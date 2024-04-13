@@ -1,0 +1,62 @@
+version: "3"
+
+vars:
+  NAME: blogserver
+  TAG:
+    sh: git rev-parse HEAD
+  PORT: 8888
+
+tasks:
+  init:
+    desc: Install dependencies
+    cmds:
+      - npm install
+      - go install github.com/a-h/templ/cmd/templ@latest
+      - go mod tidy
+
+  assets:
+    desc: Build tailwind assets
+    cmds:
+      - npx tailwindcss -i ./tailwind.css -o ./static/styles.css
+    sources:
+      - ./**/*.templ
+      - ./tailwind.css
+    generates:
+      - ./static/styles.css
+
+  generate:
+    desc: Go generate templ assets
+    cmds:
+      - go generate ./...
+    sources:
+      - ./**/*.templ
+    generates:
+      - ./**/*_templ.go
+
+  test:
+    desc: Run tests
+    cmds:
+      - go test ./...
+
+  run:
+    desc: Run the app as a local server
+    deps:
+      - assets
+      - generate
+      # - test
+    cmds:
+      - go run ./cmd/server/...
+
+  docker-build:
+    desc: Build the blogserver container using docker
+    deps:
+      # - test
+    cmds:
+      - docker build . -t {{.NAME}}:{{.TAG}}
+
+  docker-run:
+    desc: Run the blogserver container using docker
+    deps:
+      - docker-build
+    cmds:
+      - docker run -p {{.PORT}} {{.NAME}}:{{.TAG}}

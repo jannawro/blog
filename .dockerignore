@@ -1,0 +1,9 @@
+.git
+
+node_modules*
+static/*.css
+Taskfile.yaml
+.task
+
+*_templ.go
+*_templ.txt
