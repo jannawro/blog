@@ -28,8 +28,12 @@ func TestCreate(t *testing.T) {
 		expectedErr bool
 	}{
 		{
-			name:        "Valid article",
-			input:       []byte("Title: Test Article\nTags: test, article\nPublication Date: 2023-05-10\n\nThis is the content of the test article."),
+			name: "Valid article",
+			input: []byte(`Title: Test Article
+Tags: test, article
+Publication Date: 2023-05-10
+===
+This is the content of the test article.`),
 			expectedErr: false,
 		},
 		{
@@ -138,12 +142,12 @@ func TestGetByTags(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			articles, err := service.GetByTags(ctx, tt.tags)
+			arts, err := service.GetByTags(ctx, tt.tags)
 
 			assert.NoError(t, err)
-			assert.Len(t, articles, tt.expectedCount)
+			assert.Len(t, arts, tt.expectedCount)
 			for _, title := range tt.expectedTitles {
-				assert.Contains(t, articles, articles.Article{Title: title})
+				assert.Contains(t, arts, articles.Article{Title: title})
 			}
 		})
 	}
@@ -168,9 +172,13 @@ func TestUpdateByTitle(t *testing.T) {
 		expectedErr bool
 	}{
 		{
-			name:        "Update existing article",
-			title:       "Initial Article",
-			updatedData: []byte("Title: Updated Article\nTags: updated, tag\nPublication Date: 2023-05-10\n\nUpdated content"),
+			name:  "Update existing article",
+			title: "Initial Article",
+			updatedData: []byte(`Title: Updated Article
+Tags: updated, tag
+Publication Date: 2023-05-10
+
+Updated content`),
 			expectedErr: false,
 		},
 		{
