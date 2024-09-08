@@ -27,12 +27,9 @@ func (r *PostgresqlRepository) Create(ctx context.Context, article articles.Arti
 		return nil, err
 	}
 	defer func() {
-		if rollbackErr := tx.Rollback(); rollbackErr != nil {
-			// Check if the error is due to the transaction already being committed
-			if rollbackErr != sql.ErrTxDone {
-				// If it's not, log the error or handle it as appropriate
-				// For now, we'll just print it to stderr
-				fmt.Fprintf(os.Stderr, "Error rolling back transaction: %v\n", rollbackErr)
+		if err := tx.Rollback(); err != nil {
+			if err != sql.ErrTxDone {
+				fmt.Fprintf(os.Stderr, "Error rolling back transaction: %v\n", err)
 			}
 		}
 	}()
@@ -126,15 +123,19 @@ func (r *PostgresqlRepository) GetByTags(ctx context.Context, tags []string) (ar
 	return articlesSlice, nil
 }
 
-func (r *PostgresqlRepository) Update(ctx context.Context, id int64, updated articles.Article) (*articles.Article, error) {
+func (r *PostgresqlRepository) Update(
+	ctx context.Context,
+	id int64,
+	updated articles.Article,
+) (*articles.Article, error) {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
 	defer func() {
-		if rollbackErr := tx.Rollback(); rollbackErr != nil {
-			if rollbackErr != sql.ErrTxDone {
-				fmt.Fprintf(os.Stderr, "Error rolling back transaction: %v\n", rollbackErr)
+		if err := tx.Rollback(); err != nil {
+			if err != sql.ErrTxDone {
+				fmt.Fprintf(os.Stderr, "Error rolling back transaction: %v\n", err)
 			}
 		}
 	}()
@@ -169,7 +170,13 @@ func (r *PostgresqlRepository) Delete(ctx context.Context, id int64) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() {
+		if err := tx.Rollback(); err != nil {
+			if err != sql.ErrTxDone {
+				fmt.Fprintf(os.Stderr, "Error rolling back transaction: %v\n", err)
+			}
+		}
+	}()
 
 	qtx := r.q.WithTx(tx)
 	_, err = qtx.DeleteArticleByID(ctx, id)
