@@ -132,14 +132,14 @@ func TestGetByTags(t *testing.T) {
 	mockRepo.SetArticles(testArticles)
 
 	tests := []struct {
-		name           string
-		tags           []string
-		expectedCount  int
-		expectedTitles []string
+		name          string
+		tags          []string
+		expectedCount int
+		expectedIDs   []int64
 	}{
-		{"Single tag", []string{"tag1"}, 1, []string{"Article 1"}},
-		{"Multiple tags", []string{"tag2", "tag3"}, 2, []string{"Article 1", "Article 2"}},
-		{"No matching tags", []string{"tag5"}, 0, []string{}},
+		{"Single tag", []string{"tag1"}, 1, []int64{1}},
+		{"Multiple tags", []string{"tag2"}, 2, []int64{1, 2}},
+		{"No matching tags", []string{"tag5"}, 0, []int64{}},
 	}
 
 	for _, tt := range tests {
@@ -148,9 +148,12 @@ func TestGetByTags(t *testing.T) {
 
 			assert.NoError(t, err)
 			assert.Len(t, arts, tt.expectedCount)
-			for _, title := range tt.expectedTitles {
-				assert.Contains(t, arts, articles.Article{Title: title})
+			
+			actualIDs := make([]int64, len(arts))
+			for i, art := range arts {
+				actualIDs[i] = art.ID
 			}
+			assert.ElementsMatch(t, tt.expectedIDs, actualIDs)
 		})
 	}
 }
