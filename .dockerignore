@@ -7,3 +7,5 @@ Taskfile.yaml
 
 *_templ.go
 *_templ.txt
+
+*_sqlc.go

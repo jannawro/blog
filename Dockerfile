@@ -22,6 +22,7 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 RUN go install github.com/a-h/templ/cmd/templ@latest
+RUN go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 
 ## copy the whole source
 COPY . .
@@ -29,7 +30,7 @@ COPY . .
 ## copy built css from build-css
 COPY --from=build-css /app/static/styles.css ./static/styles.css
 
-## generate go code from .templ files
+## generate go code
 RUN go generate ./...
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /app/blogserver ./cmd/server/main.go

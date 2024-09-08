@@ -7,11 +7,13 @@ vars:
   PORT: 8888
 
 tasks:
-  init:
+  dep:
     desc: Install dependencies
     cmds:
       - npm install
       - go install github.com/a-h/templ/cmd/templ@latest
+      - go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
       - go mod tidy
 
   assets:
@@ -25,18 +27,30 @@ tasks:
       - ./static/styles.css
 
   generate:
-    desc: Go generate templ assets
+    desc: Code generation
     cmds:
       - go generate ./...
     sources:
       - ./**/*.templ
+      - ./repository/sqlc/*.sql
     generates:
       - ./**/*_templ.go
+      - ./repository/*_sqlc.go
+
+  lint:
+    desc: Run lint
+    cmds:
+      - golangci-lint run
+    deps:
+      - generate
 
   test:
     desc: Run tests
     cmds:
       - go test ./...
+    deps:
+      - assets
+      - lint
 
   run:
     desc: Run the app as a local server

@@ -46,6 +46,9 @@ func placeholderHandler() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		response := "You called a placeholder!"
 		log.Println(response)
-		w.Write([]byte(response))
+		_, err := w.Write([]byte(response))
+		if err != nil {
+			panic(err)
+		}
 	}
 }

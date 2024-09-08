@@ -30,3 +30,9 @@ static/*.css
 # templ
 *_templ.go
 *_templ.txt
+
+# aider
+.aider*
+
+# python
+.venv

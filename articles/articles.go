@@ -1,7 +1,9 @@
 package articles
 
 import (
+	"context"
 	"errors"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -24,6 +26,7 @@ var (
 // # Markdown Title
 // Markdown contents...`
 type Article struct {
+	ID              int64
 	Title           string
 	Content         string
 	Tags            []string
@@ -31,6 +34,27 @@ type Article struct {
 }
 
 type Articles []Article
+
+type ArticleRepository interface {
+	Create(ctx context.Context, article Article) (*Article, error)
+	GetAll(ctx context.Context) (Articles, error)
+	GetByID(ctx context.Context, id int64) (*Article, error)
+	GetByTitle(ctx context.Context, title string) (*Article, error)
+	GetByTags(ctx context.Context, tags []string) (Articles, error)
+	Update(ctx context.Context, id int64, updated Article) (*Article, error)
+	Delete(ctx context.Context, id int64) error
+}
+
+type ArticleService interface {
+	Create(ctx context.Context, article Article) (*Article, error)
+	GetAll(ctx context.Context) (Articles, error)
+	GetByTitle(ctx context.Context, title string) (*Article, error)
+	GetByTags(ctx context.Context, tags []string) (Articles, error)
+	UpdateByTitle(ctx context.Context, title string, updated Article) (*Article, error)
+	DeleteByTitle(ctx context.Context, title string) error
+}
+
+type ArticleHandler http.Handler
 
 // UnmarshalToArticle parses a markdown file with specific headers and stores the result as an article in a
 func UnmarshalToArticle(data []byte, a *Article) error {

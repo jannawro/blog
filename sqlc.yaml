@@ -1,0 +1,13 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "repository/sqlc/query.sql"
+    schema: "repository/sqlc/schema.sql"
+    gen:
+      go:
+        package: "repository"
+        out: "repository"
+        sql_package: "database/sql"
+        output_models_file_name: models_sqlc.go
+        output_db_file_name: db_sqlc.go
+        output_files_suffix: _sqlc
