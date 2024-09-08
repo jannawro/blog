@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"os"
 
 	"github.com/jannawro/blog/articles"
 )
@@ -24,7 +26,16 @@ func (r *PostgresqlRepository) Create(ctx context.Context, article articles.Arti
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback()
+	defer func() {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			// Check if the error is due to the transaction already being committed
+			if rollbackErr != sql.ErrTxDone {
+				// If it's not, log the error or handle it as appropriate
+				// For now, we'll just print it to stderr
+				fmt.Fprintf(os.Stderr, "Error rolling back transaction: %v\n", rollbackErr)
+			}
+		}
+	}()
 
 	qtx := r.q.WithTx(tx)
 	id, err := qtx.CreateArticle(ctx, CreateArticleParams{
@@ -120,7 +131,13 @@ func (r *PostgresqlRepository) Update(ctx context.Context, id int64, updated art
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback()
+	defer func() {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			if rollbackErr != sql.ErrTxDone {
+				fmt.Fprintf(os.Stderr, "Error rolling back transaction: %v\n", rollbackErr)
+			}
+		}
+	}()
 
 	qtx := r.q.WithTx(tx)
 	dbArticle, err := qtx.UpdateArticleByID(ctx, UpdateArticleByIDParams{
