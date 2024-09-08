@@ -29,9 +29,9 @@ func TestCreate(t *testing.T) {
 	}{
 		{
 			name: "Valid article",
-			input: []byte(`Title: Test Article
-Tags: test, article
-Publication Date: 2023-05-10
+			input: []byte(`title:Test Article
+publicationDate:2023-05-10
+tags:test,article
 ===
 This is the content of the test article.`),
 			expectedErr: false,
@@ -54,8 +54,10 @@ This is the content of the test article.`),
 				assert.NoError(t, err)
 				require.NotNil(t, article)
 				assert.NotEmpty(t, article.ID)
-				assert.Equal(t, "Test Article", article.Title)
+				assert.Equal(t, "test-article", article.Title)
 				assert.Equal(t, []string{"test", "article"}, article.Tags)
+				expectedDate, _ := time.Parse("2006-01-02", "2023-05-10")
+				assert.Equal(t, expectedDate, article.PublicationDate)
 				assert.Equal(t, "This is the content of the test article.", article.Content)
 			}
 		})
@@ -86,10 +88,10 @@ func TestGetByTitle(t *testing.T) {
 
 	testArticle := articles.Article{
 		ID:              1,
-		Title:           "Test Article",
+		Title:           "test-article",
 		Content:         "This is a test article",
 		Tags:            []string{"test", "article"},
-		PublicationDate: time.Now(),
+		PublicationDate: time.Date(2023, 5, 10, 0, 0, 0, 0, time.UTC),
 	}
 	mockRepo.SetArticles([]articles.Article{testArticle})
 
@@ -98,8 +100,8 @@ func TestGetByTitle(t *testing.T) {
 		title         string
 		expectedFound bool
 	}{
-		{"Existing article", "Test Article", true},
-		{"Non-existing article", "Missing Article", false},
+		{"Existing article", "test-article", true},
+		{"Non-existing article", "missing-article", false},
 	}
 
 	for _, tt := range tests {
@@ -174,10 +176,10 @@ func TestUpdateByTitle(t *testing.T) {
 		{
 			name:  "Update existing article",
 			title: "Initial Article",
-			updatedData: []byte(`Title: Updated Article
-Tags: updated, tag
-Publication Date: 2023-05-10
-
+			updatedData: []byte(`title:Updated Article
+publicationDate:2023-05-10
+tags:updated,tag
+===
 Updated content`),
 			expectedErr: false,
 		},
@@ -199,8 +201,10 @@ Updated content`),
 			} else {
 				assert.NoError(t, err)
 				require.NotNil(t, updatedArticle)
-				assert.Equal(t, "Updated Article", updatedArticle.Title)
+				assert.Equal(t, "updated-article", updatedArticle.Title)
 				assert.Equal(t, []string{"updated", "tag"}, updatedArticle.Tags)
+				expectedDate, _ := time.Parse("2006-01-02", "2023-05-10")
+				assert.Equal(t, expectedDate, updatedArticle.PublicationDate)
 				assert.Equal(t, "Updated content", updatedArticle.Content)
 			}
 		})
