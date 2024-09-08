@@ -39,6 +39,4 @@ FROM scratch
 
 COPY --from=build-app /app/blogserver /blogserver
 
-EXPOSE 8888
-
 CMD ["/blogserver"]

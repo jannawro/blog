@@ -43,14 +43,14 @@ tasks:
     deps:
       - assets
       - generate
-      # - test
+      - test
     cmds:
-      - go run ./cmd/server/...
+      - go run ./cmd/server/... --port {{.PORT}}
 
   docker-build:
     desc: Build the blogserver container using docker
     deps:
-      # - test
+      - test
     cmds:
       - docker build . -t {{.NAME}}:{{.TAG}}
 
@@ -59,4 +59,4 @@ tasks:
     deps:
       - docker-build
     cmds:
-      - docker run -p {{.PORT}} {{.NAME}}:{{.TAG}}
+      - docker run -p {{.PORT}} {{.NAME}}:{{.TAG}} --port {{.PORT}}

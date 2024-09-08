@@ -8,8 +8,8 @@ import (
 //go:embed styles.css favicon.svg
 var static embed.FS
 
-// Mount adds a handler for the /static/ path that serves static assets
-func Mount(router *http.ServeMux) {
+// Handler returns an http.Handler that serves static assets on "path" endpoint
+func Handler(path string) http.Handler {
 	fileServer := http.FileServer(http.FS(static))
-	router.Handle("/static/", http.StripPrefix("/static/", fileServer))
+	return http.StripPrefix(path, fileServer)
 }
