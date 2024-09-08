@@ -148,7 +148,7 @@ func TestGetByTags(t *testing.T) {
 
 			assert.NoError(t, err)
 			assert.Len(t, arts, tt.expectedCount)
-			
+
 			actualIDs := make([]int64, len(arts))
 			for i, art := range arts {
 				actualIDs[i] = art.ID

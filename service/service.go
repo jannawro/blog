@@ -35,7 +35,11 @@ func (s *ArticleService) GetByTags(ctx context.Context, tags []string) (articles
 	return s.repo.GetByTags(ctx, tags)
 }
 
-func (s *ArticleService) UpdateByTitle(ctx context.Context, title string, updatedData []byte) (*articles.Article, error) {
+func (s *ArticleService) UpdateByTitle(
+	ctx context.Context,
+	title string,
+	updatedData []byte,
+) (*articles.Article, error) {
 	existingArticle, err := s.repo.GetByTitle(ctx, title)
 	if err != nil {
 		return nil, err

@@ -103,12 +103,12 @@ func (m *MockRepository) Delete(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (m *MockRepository) SetArticles(articles []articles.Article) {
+func (m *MockRepository) SetArticles(setArticles []articles.Article) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
 	m.articles = make(map[int64]articles.Article)
-	for _, article := range articles {
+	for _, article := range setArticles {
 		m.articles[article.ID] = article
 		if article.ID >= m.nextID {
 			m.nextID = article.ID + 1
