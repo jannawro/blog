@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 
-	. "github.com/jannawro/blog/articles"
+	"github.com/jannawro/blog/articles"
 )
 
 type PostgresqlRepository struct {
@@ -19,7 +19,7 @@ func NewPostgresqlRepository(db *sql.DB) *PostgresqlRepository {
 	}
 }
 
-func (r *PostgresqlRepository) Create(ctx context.Context, article Article) (*Article, error) {
+func (r *PostgresqlRepository) Create(ctx context.Context, article articles.Article) (*articles.Article, error) {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -45,15 +45,15 @@ func (r *PostgresqlRepository) Create(ctx context.Context, article Article) (*Ar
 	return &article, nil
 }
 
-func (r *PostgresqlRepository) GetAll(ctx context.Context) (Articles, error) {
+func (r *PostgresqlRepository) GetAll(ctx context.Context) (articles.Articles, error) {
 	dbArticles, err := r.q.GetAllArticles(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	articles := make(Articles, len(dbArticles))
+	articlesSlice := make(articles.Articles, len(dbArticles))
 	for i, a := range dbArticles {
-		articles[i] = Article{
+		articlesSlice[i] = articles.Article{
 			ID:              a.ID,
 			Title:           a.Title,
 			Content:         a.Content,
@@ -62,16 +62,16 @@ func (r *PostgresqlRepository) GetAll(ctx context.Context) (Articles, error) {
 		}
 	}
 
-	return articles, nil
+	return articlesSlice, nil
 }
 
-func (r *PostgresqlRepository) GetByID(ctx context.Context, id int64) (*Article, error) {
+func (r *PostgresqlRepository) GetByID(ctx context.Context, id int64) (*articles.Article, error) {
 	dbArticle, err := r.q.GetArticleByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Article{
+	return &articles.Article{
 		ID:              dbArticle.ID,
 		Title:           dbArticle.Title,
 		Content:         dbArticle.Content,
@@ -80,13 +80,13 @@ func (r *PostgresqlRepository) GetByID(ctx context.Context, id int64) (*Article,
 	}, nil
 }
 
-func (r *PostgresqlRepository) GetByTitle(ctx context.Context, title string) (*Article, error) {
+func (r *PostgresqlRepository) GetByTitle(ctx context.Context, title string) (*articles.Article, error) {
 	dbArticle, err := r.q.GetArticleByTitle(ctx, title)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Article{
+	return &articles.Article{
 		ID:              dbArticle.ID,
 		Title:           dbArticle.Title,
 		Content:         dbArticle.Content,
@@ -95,15 +95,15 @@ func (r *PostgresqlRepository) GetByTitle(ctx context.Context, title string) (*A
 	}, nil
 }
 
-func (r *PostgresqlRepository) GetByTags(ctx context.Context, tags []string) (Articles, error) {
+func (r *PostgresqlRepository) GetByTags(ctx context.Context, tags []string) (articles.Articles, error) {
 	dbArticles, err := r.q.GetArticlesByTags(ctx, tags)
 	if err != nil {
 		return nil, err
 	}
 
-	articles := make(Articles, len(dbArticles))
+	articlesSlice := make(articles.Articles, len(dbArticles))
 	for i, a := range dbArticles {
-		articles[i] = Article{
+		articlesSlice[i] = articles.Article{
 			ID:              a.ID,
 			Title:           a.Title,
 			Content:         a.Content,
@@ -112,10 +112,10 @@ func (r *PostgresqlRepository) GetByTags(ctx context.Context, tags []string) (Ar
 		}
 	}
 
-	return articles, nil
+	return articlesSlice, nil
 }
 
-func (r *PostgresqlRepository) Update(ctx context.Context, id int64, updated Article) (*Article, error) {
+func (r *PostgresqlRepository) Update(ctx context.Context, id int64, updated articles.Article) (*articles.Article, error) {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -138,7 +138,7 @@ func (r *PostgresqlRepository) Update(ctx context.Context, id int64, updated Art
 		return nil, err
 	}
 
-	return &Article{
+	return &articles.Article{
 		ID:              dbArticle.ID,
 		Title:           dbArticle.Title,
 		Content:         dbArticle.Content,
