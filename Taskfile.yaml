@@ -5,15 +5,18 @@ vars:
   TAG:
     sh: git rev-parse HEAD
   PORT: 8888
+  TEMPL_VERSION: v0.2.778
+  SQLC_VERSION: v1.27.0
+  GOLANGCILINT_VERSION: v1.60.3
 
 tasks:
   dep:
     desc: Install dependencies
     cmds:
       - npm install
-      - go install github.com/a-h/templ/cmd/templ@latest
-      - go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
-      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+      - go install github.com/a-h/templ/cmd/templ@{{.TEMPL_VERSION}}
+      - go install github.com/sqlc-dev/sqlc/cmd/sqlc@{{.SQLC_VERSION}}
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@{{.GOLANGCILINT_VERSION}}
       - go mod tidy
 
   assets:
