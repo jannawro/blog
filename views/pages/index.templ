@@ -1,5 +1,34 @@
 package templates
 
-templ Index(name string) {
-	<div>Hello, { name }</div>
+import (
+	"github.com/jannawro/blog/article"
+	"github.com/jannawro/blog/views/components"
+)
+
+templ Index(articles []article.Article) {
+	@components.Page("Blog Index") {
+		<div class="container mx-auto px-4">
+			<header class="mb-12 mt-8">
+				<h1 class="text-6xl font-bold uppercase text-[#1a1a1a]">Blog Title</h1>
+				<p class="text-xl text-[#1a1a1a] mt-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+			</header>
+			
+			<main>
+				for i, article := range articles {
+					<div class={ "flex mb-12", ternary(i%2 == 0, "justify-start", "justify-end") }>
+						<div class={ "w-3/4", ternary(i%2 == 0, "", "ml-auto") }>
+							@components.ArticleCard(article)
+						</div>
+					</div>
+				}
+			</main>
+		</div>
+	}
+}
+
+func ternary(condition bool, trueValue, falseValue string) string {
+	if condition {
+		return trueValue
+	}
+	return falseValue
 }
