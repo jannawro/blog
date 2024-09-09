@@ -38,7 +38,11 @@ func (s *ArticleService) GetByTitle(ctx context.Context, title string) (*article
 	return s.repo.GetByTitle(ctx, title)
 }
 
-func (s *ArticleService) GetByTags(ctx context.Context, tags []string, sortBy *articles.SortOption) (articles.Articles, error) {
+func (s *ArticleService) GetByTags(
+	ctx context.Context,
+	tags []string,
+	sortBy *articles.SortOption,
+) (articles.Articles, error) {
 	articles, err := s.repo.GetByTags(ctx, tags)
 	if err != nil {
 		return nil, err
