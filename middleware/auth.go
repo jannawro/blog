@@ -2,7 +2,19 @@ package middleware
 
 import (
 	"net/http"
+
+	"github.com/gorilla/sessions"
 )
+
+var store *sessions.CookieStore
+
+func init() {
+	store = sessions.NewCookieStore([]byte("your-secret-key"))
+}
+
+type SessionConfig struct {
+	SessionName string
+}
 
 type APIKeyConfig struct {
 	KeyName string
