@@ -10,6 +10,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var store *sessions.CookieStore
+
 func TestAPIKeyAuth(t *testing.T) {
 	config := APIKeyConfig{
 		KeyName: "X-API-Key",
@@ -48,12 +50,11 @@ func TestAPIKeyAuth(t *testing.T) {
 }
 
 func TestSessionAuth(t *testing.T) {
+	store = sessions.NewCookieStore([]byte("test-secret"))
 	config := SessionConfig{
 		SessionName: "test-session",
+		CookieStore: store,
 	}
-
-	// Create a test session store
-	store = sessions.NewCookieStore([]byte("test-secret"))
 
 	tests := []struct {
 		name           string
@@ -89,6 +90,7 @@ func TestSessionAuth(t *testing.T) {
 }
 
 func TestCombinedAuth(t *testing.T) {
+	store = sessions.NewCookieStore([]byte("test-secret"))
 	apiConfig := APIKeyConfig{
 		KeyName: "X-API-Key",
 		Keys: map[string]bool{
@@ -98,10 +100,8 @@ func TestCombinedAuth(t *testing.T) {
 
 	sessionConfig := SessionConfig{
 		SessionName: "test-session",
+		CookieStore: store,
 	}
-
-	// Create a test session store
-	store = sessions.NewCookieStore([]byte("test-secret"))
 
 	tests := []struct {
 		name           string
