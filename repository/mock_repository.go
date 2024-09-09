@@ -5,23 +5,23 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/jannawro/blog/articles"
+	"github.com/jannawro/blog/article"
 )
 
 type MockRepository struct {
-	articles map[int64]articles.Article
+	articles map[int64]article.Article
 	mutex    sync.RWMutex
 	nextID   int64
 }
 
 func NewMockRepository() *MockRepository {
 	return &MockRepository{
-		articles: make(map[int64]articles.Article),
+		articles: make(map[int64]article.Article),
 		nextID:   1,
 	}
 }
 
-func (m *MockRepository) Create(ctx context.Context, article articles.Article) (*articles.Article, error) {
+func (m *MockRepository) Create(ctx context.Context, article article.Article) (*article.Article, error) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
@@ -32,18 +32,18 @@ func (m *MockRepository) Create(ctx context.Context, article articles.Article) (
 	return &article, nil
 }
 
-func (m *MockRepository) GetAll(ctx context.Context) (articles.Articles, error) {
+func (m *MockRepository) GetAll(ctx context.Context) (article.Articles, error) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
-	result := make(articles.Articles, 0, len(m.articles))
+	result := make(article.Articles, 0, len(m.articles))
 	for _, article := range m.articles {
 		result = append(result, article)
 	}
 	return result, nil
 }
 
-func (m *MockRepository) GetByID(ctx context.Context, id int64) (*articles.Article, error) {
+func (m *MockRepository) GetByID(ctx context.Context, id int64) (*article.Article, error) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
@@ -53,7 +53,7 @@ func (m *MockRepository) GetByID(ctx context.Context, id int64) (*articles.Artic
 	return nil, errors.New("article not found")
 }
 
-func (m *MockRepository) GetByTitle(ctx context.Context, title string) (*articles.Article, error) {
+func (m *MockRepository) GetByTitle(ctx context.Context, title string) (*article.Article, error) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
@@ -65,11 +65,11 @@ func (m *MockRepository) GetByTitle(ctx context.Context, title string) (*article
 	return nil, errors.New("article not found")
 }
 
-func (m *MockRepository) GetByTags(ctx context.Context, tags []string) (articles.Articles, error) {
+func (m *MockRepository) GetByTags(ctx context.Context, tags []string) (article.Articles, error) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
-	result := make(articles.Articles, 0)
+	result := make(article.Articles, 0)
 	for _, article := range m.articles {
 		if containsAllTags(article.Tags, tags) {
 			result = append(result, article)
@@ -78,7 +78,7 @@ func (m *MockRepository) GetByTags(ctx context.Context, tags []string) (articles
 	return result, nil
 }
 
-func (m *MockRepository) Update(ctx context.Context, id int64, updated articles.Article) (*articles.Article, error) {
+func (m *MockRepository) Update(ctx context.Context, id int64, updated article.Article) (*article.Article, error) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
@@ -103,11 +103,11 @@ func (m *MockRepository) Delete(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (m *MockRepository) SetArticles(setArticles []articles.Article) {
+func (m *MockRepository) SetArticles(setArticles []article.Article) {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
-	m.articles = make(map[int64]articles.Article)
+	m.articles = make(map[int64]article.Article)
 	for _, article := range setArticles {
 		m.articles[article.ID] = article
 		if article.ID >= m.nextID {
@@ -120,7 +120,7 @@ func (m *MockRepository) Reset() {
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
 
-	m.articles = make(map[int64]articles.Article)
+	m.articles = make(map[int64]article.Article)
 	m.nextID = 1
 }
 

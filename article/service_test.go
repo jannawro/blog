@@ -1,4 +1,4 @@
-package articles_test
+package article_test
 
 import (
 	"context"
@@ -8,13 +8,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/jannawro/blog/articles"
+	article1 "github.com/jannawro/blog/article"
 	"github.com/jannawro/blog/repository"
 )
 
-func setupTestService() (*articles.Service, *repository.MockRepository) {
+func setupTestService() (*article1.Service, *repository.MockRepository) {
 	mockRepo := repository.NewMockRepository()
-	articleService := articles.NewService(mockRepo)
+	articleService := article1.NewService(mockRepo)
 	return articleService, mockRepo
 }
 
@@ -68,7 +68,7 @@ func TestGetAll(t *testing.T) {
 	service, mockRepo := setupTestService()
 	ctx := context.Background()
 
-	testArticles := []articles.Article{
+	testArticles := []article1.Article{
 		{ID: 1, Title: "Article 1", Content: "Content 1", Tags: []string{"tag1", "tag2"}},
 		{ID: 2, Title: "Article 2", Content: "Content 2", Tags: []string{"tag2", "tag3"}},
 	}
@@ -86,14 +86,14 @@ func TestGetByTitle(t *testing.T) {
 	service, mockRepo := setupTestService()
 	ctx := context.Background()
 
-	testArticle := articles.Article{
+	testArticle := article1.Article{
 		ID:              1,
 		Title:           "test-article",
 		Content:         "This is a test article",
 		Tags:            []string{"test", "article"},
 		PublicationDate: time.Date(2023, 5, 10, 0, 0, 0, 0, time.UTC),
 	}
-	mockRepo.SetArticles([]articles.Article{testArticle})
+	mockRepo.SetArticles([]article1.Article{testArticle})
 
 	tests := []struct {
 		name          string
@@ -124,7 +124,7 @@ func TestGetByTags(t *testing.T) {
 	service, mockRepo := setupTestService()
 	ctx := context.Background()
 
-	testArticles := []articles.Article{
+	testArticles := []article1.Article{
 		{ID: 1, Title: "Article 1", Content: "Content 1", Tags: []string{"tag1", "tag2"}},
 		{ID: 2, Title: "Article 2", Content: "Content 2", Tags: []string{"tag2", "tag3"}},
 		{ID: 3, Title: "Article 3", Content: "Content 3", Tags: []string{"tag3", "tag4"}},
@@ -162,13 +162,13 @@ func TestUpdateByTitle(t *testing.T) {
 	service, mockRepo := setupTestService()
 	ctx := context.Background()
 
-	initialArticle := articles.Article{
+	initialArticle := article1.Article{
 		ID:      1,
 		Title:   "Initial Article",
 		Content: "Initial content",
 		Tags:    []string{"initial", "tag"},
 	}
-	mockRepo.SetArticles([]articles.Article{initialArticle})
+	mockRepo.SetArticles([]article1.Article{initialArticle})
 
 	tests := []struct {
 		name        string
@@ -218,11 +218,11 @@ func TestDeleteByTitle(t *testing.T) {
 	service, mockRepo := setupTestService()
 	ctx := context.Background()
 
-	initialArticle := articles.Article{
+	initialArticle := article1.Article{
 		ID:    1,
 		Title: "Article to Delete",
 	}
-	mockRepo.SetArticles([]articles.Article{initialArticle})
+	mockRepo.SetArticles([]article1.Article{initialArticle})
 
 	tests := []struct {
 		name        string
