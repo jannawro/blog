@@ -36,3 +36,6 @@ static/*.css
 
 # python
 .venv
+
+# misc
+TODO.md

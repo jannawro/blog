@@ -6,14 +6,9 @@ import (
 	"github.com/gorilla/sessions"
 )
 
-var store *sessions.CookieStore
-
-func init() {
-	store = sessions.NewCookieStore([]byte("your-secret-key"))
-}
-
 type SessionConfig struct {
 	SessionName string
+	CookieStore *sessions.CookieStore
 }
 
 type APIKeyConfig struct {
@@ -53,7 +48,7 @@ func CombinedAuth(apiConfig APIKeyConfig, sessionConfig SessionConfig) Middlewar
 			}
 
 			// If no valid API key, check for session
-			session, err := store.Get(r, sessionConfig.SessionName)
+			session, err := sessionConfig.CookieStore.Get(r, sessionConfig.SessionName)
 			if err != nil {
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
