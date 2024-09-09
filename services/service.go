@@ -23,16 +23,30 @@ func (s *ArticleService) Create(ctx context.Context, articleData []byte) (*artic
 	return s.repo.Create(ctx, article)
 }
 
-func (s *ArticleService) GetAll(ctx context.Context) (articles.Articles, error) {
-	return s.repo.GetAll(ctx)
+func (s *ArticleService) GetAll(ctx context.Context, sortBy *articles.SortOption) (articles.Articles, error) {
+	articles, err := s.repo.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if sortBy != nil {
+		articles.Sort(*sortBy)
+	}
+	return articles, nil
 }
 
 func (s *ArticleService) GetByTitle(ctx context.Context, title string) (*articles.Article, error) {
 	return s.repo.GetByTitle(ctx, title)
 }
 
-func (s *ArticleService) GetByTags(ctx context.Context, tags []string) (articles.Articles, error) {
-	return s.repo.GetByTags(ctx, tags)
+func (s *ArticleService) GetByTags(ctx context.Context, tags []string, sortBy *articles.SortOption) (articles.Articles, error) {
+	articles, err := s.repo.GetByTags(ctx, tags)
+	if err != nil {
+		return nil, err
+	}
+	if sortBy != nil {
+		articles.Sort(*sortBy)
+	}
+	return articles, nil
 }
 
 func (s *ArticleService) UpdateByTitle(
