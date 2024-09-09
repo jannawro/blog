@@ -6,9 +6,9 @@ import (
 )
 
 templ ArticleCard(a article.Article) {
-	<div class="border-4 border-black mb-8 p-4 bg-white">
-		<h2 class="text-4xl font-bold mb-4 uppercase">{ a.Title }</h2>
-		<p class="mb-4 text-lg">
+	<div class="border-4 border-[#1a1a1a] mb-8 p-4 bg-[#f5f5f5]">
+		<h2 class="text-4xl font-bold mb-4 uppercase text-[#1a1a1a]">{ a.Title }</h2>
+		<p class="mb-4 text-lg text-[#1a1a1a]">
 			if len(a.Content) > 150 {
 				{ a.Content[:150] + "..." }
 			} else {
@@ -16,14 +16,14 @@ templ ArticleCard(a article.Article) {
 			}
 		</p>
 		<div class="mb-4">
-			<span class="text-lg font-bold mr-4">{ a.PublicationDate.Format("2006-01-02") }</span>
+			<span class="text-lg font-bold mr-4 text-[#1a1a1a]">{ a.PublicationDate.Format("2006-01-02") }</span>
 			<div class="flex flex-wrap">
 				for _, tag := range a.Tags {
-					<span class="border-2 border-black px-2 py-1 text-sm font-bold mr-2 mb-2 uppercase">{ tag }</span>
+					<span class="border-2 border-[#1a1a1a] px-2 py-1 text-sm font-bold mr-2 mb-2 uppercase text-[#1a1a1a]">{ tag }</span>
 				}
 			</div>
 		</div>
-		<a href={ templ.SafeURL(fmt.Sprintf("/article/%d", a.ID)) } class="inline-block bg-black text-white font-bold py-2 px-4 hover:bg-white hover:text-black border-2 border-black transition-colors duration-200">
+		<a href={ templ.SafeURL(fmt.Sprintf("/article/%d", a.ID)) } class="inline-block bg-[#1a1a1a] text-[#f5f5f5] font-bold py-2 px-4 hover:bg-[#f5f5f5] hover:text-[#1a1a1a] border-2 border-[#1a1a1a] transition-colors duration-200">
 			READ MORE
 		</a>
 	</div>
