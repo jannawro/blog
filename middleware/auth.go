@@ -41,36 +41,26 @@ func APIKeyAuth(config APIKeyConfig) Middleware {
 	}
 }
 
-func CombinedAuth(apiConfig APIKeyConfig, sessionConfig *SessionConfig) Middleware {
+func SessionAuth(config *SessionConfig) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Check for API key first
-			key := r.Header.Get(apiConfig.KeyName)
-			if key != "" {
-				if _, valid := apiConfig.Keys[key]; valid {
-					next.ServeHTTP(w, r)
-					return
-				}
-			}
-
-			// If no valid API key, check for session
 			sessionName := os.Getenv("SESSION_NAME")
 			if sessionName == "" {
 				sessionName = "default_session_name" // fallback
 			}
 
-			session, err := sessionConfig.CookieStore.Get(r, sessionName)
+			session, err := config.CookieStore.Get(r, sessionName)
 			if err != nil {
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
-			if auth, ok := session.Values["authenticated"].(bool); ok && auth {
-				next.ServeHTTP(w, r)
+
+			if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
 
-			// If neither API key nor session is valid, return Unauthorized
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			next.ServeHTTP(w, r)
 		})
 	}
 }
