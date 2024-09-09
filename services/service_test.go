@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"context"
@@ -10,11 +10,12 @@ import (
 
 	"github.com/jannawro/blog/articles"
 	"github.com/jannawro/blog/repository"
+	"github.com/jannawro/blog/services"
 )
 
-func setupTestService() (*ArticleService, *repository.MockRepository) {
+func setupTestService() (*services.ArticleService, *repository.MockRepository) {
 	mockRepo := repository.NewMockRepository()
-	service := NewArticleService(mockRepo)
+	service := services.NewArticleService(mockRepo)
 	return service, mockRepo
 }
 
