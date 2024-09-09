@@ -10,12 +10,12 @@ import (
 
 	"github.com/jannawro/blog/articles"
 	"github.com/jannawro/blog/repository"
-	"github.com/jannawro/blog/services"
+	"github.com/jannawro/blog/services/service"
 )
 
-func setupTestService() (*services.ArticleService, *repository.MockRepository) {
+func setupTestService() (*service.ArticleService, *repository.MockRepository) {
 	mockRepo := repository.NewMockRepository()
-	service := services.NewArticleService(mockRepo)
+	articleService := service.NewArticleService(mockRepo)
 	return service, mockRepo
 }
 
