@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
@@ -27,12 +28,13 @@ func main() {
 	ctx := context.Background()
 
 	// Render the component to HTML
-	html, err := component.Render(ctx)
+	var html bytes.Buffer
+	err := component.Render(ctx, &html)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error rendering component: %v\n", err)
 		os.Exit(1)
 	}
 
 	// Print the rendered HTML
-	fmt.Println(html)
+	fmt.Println(html.String())
 }
