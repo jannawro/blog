@@ -42,25 +42,27 @@ func APIKeyAuth(config APIKeyConfig) Middleware {
 }
 
 func SessionAuth(config *SessionConfig) Middleware {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			sessionName := os.Getenv("SESSION_NAME")
-			if sessionName == "" {
-				sessionName = "default_session_name" // fallback
-			}
+    return func(next http.Handler) http.Handler {
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+            sessionName := os.Getenv("SESSION_NAME")
+            if sessionName == "" {
+                sessionName = "default_session_name" // fallback
+            }
 
-			session, err := config.CookieStore.Get(r, sessionName)
-			if err != nil {
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-				return
-			}
+            session, err := config.CookieStore.Get(r, sessionName)
+            if err != nil {
+                http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+                return
+            }
 
-			if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
-				return
-			}
+            // Check if the session is authenticated
+            if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
+                http.Error(w, "Unauthorized", http.StatusUnauthorized)
+                return
+            }
 
-			next.ServeHTTP(w, r)
-		})
-	}
+            // If we reach here, the session is authenticated
+            next.ServeHTTP(w, r)
+        })
+    }
 }
