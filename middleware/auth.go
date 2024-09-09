@@ -41,7 +41,11 @@ func CombinedAuth(apiConfig APIKeyConfig, sessionConfig SessionConfig) Middlewar
 			}
 
 			// If no valid API key, check for session
-			session, _ := store.Get(r, sessionConfig.SessionName)
+			session, err := store.Get(r, sessionConfig.SessionName)
+			if err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
 			if auth, ok := session.Values["authenticated"].(bool); ok && auth {
 				next.ServeHTTP(w, r)
 				return

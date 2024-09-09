@@ -19,7 +19,11 @@ type SessionConfig struct {
 func SessionAuth(config SessionConfig) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			session, _ := store.Get(r, config.SessionName)
+			session, err := store.Get(r, config.SessionName)
+			if err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
 
 			// Check if user is authenticated
 			if auth, ok := session.Values["authenticated"].(bool); !ok || !auth {
