@@ -69,6 +69,7 @@ func CombinedAuth(apiConfig APIKeyConfig, sessionConfig *SessionConfig) Middlewa
 				return
 			}
 
+			// If neither API key nor session is valid, return Unauthorized
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		})
 	}
