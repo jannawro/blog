@@ -50,7 +50,7 @@ func (a Articles) Sort(option SortOption) {
 	sort.Slice(a, func(i, j int) bool {
 		switch option {
 		case SortByTitle:
-			return a[i].Title < a[j].Title
+			return strings.ToLower(a[i].Title) < strings.ToLower(a[j].Title)
 		case SortByPublicationDate:
 			return a[i].PublicationDate.Before(a[j].PublicationDate)
 		case SortByID:
