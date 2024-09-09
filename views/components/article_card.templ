@@ -6,27 +6,25 @@ import (
 )
 
 templ ArticleCard(a article.Article) {
-    <div class="bg-white shadow-md rounded-lg overflow-hidden mb-6">
-        <div class="p-6">
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">{ a.Title }</h2>
-            <p class="text-gray-600 mb-4">
-                if len(a.Content) > 150 {
-                    { a.Content[:150] + "..." }
-                } else {
-                    { a.Content }
+    <div class="border-4 border-black mb-8 p-4 bg-white">
+        <h2 class="text-4xl font-bold mb-4 uppercase">{ a.Title }</h2>
+        <p class="mb-4 text-lg">
+            if len(a.Content) > 150 {
+                { a.Content[:150] + "..." }
+            } else {
+                { a.Content }
+            }
+        </p>
+        <div class="mb-4">
+            <span class="text-lg font-bold mr-4">{ a.PublicationDate.Format("2006-01-02") }</span>
+            <div class="flex flex-wrap">
+                for _, tag := range a.Tags {
+                    <span class="border-2 border-black px-2 py-1 text-sm font-bold mr-2 mb-2 uppercase">{ tag }</span>
                 }
-            </p>
-            <div class="flex items-center text-sm text-gray-500 mb-4">
-                <span class="mr-4">{ a.PublicationDate.Format("2006-01-02") }</span>
-                <div class="flex flex-wrap">
-                    for _, tag := range a.Tags {
-                        <span class="bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">{ tag }</span>
-                    }
-                </div>
             </div>
-            <a href={ templ.SafeURL(fmt.Sprintf("/article/%d", a.ID)) } class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-                Read more
-            </a>
         </div>
+        <a href={ templ.SafeURL(fmt.Sprintf("/article/%d", a.ID)) } class="inline-block bg-black text-white font-bold py-2 px-4 hover:bg-white hover:text-black border-2 border-black transition-colors duration-200">
+            READ MORE
+        </a>
     </div>
 }
