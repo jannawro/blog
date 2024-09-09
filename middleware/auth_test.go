@@ -51,10 +51,7 @@ func TestAPIKeyAuth(t *testing.T) {
 
 func TestSessionAuth(t *testing.T) {
 	store = sessions.NewCookieStore([]byte("test-secret"))
-	sessionConfig := SessionConfig{
-		SessionName: "test-session",
-		CookieStore: store,
-	}
+	sessionConfig := NewSessionConfig(store)
 
 	// Create a dummy APIKeyConfig
 	apiConfig := APIKeyConfig{
@@ -66,13 +63,23 @@ func TestSessionAuth(t *testing.T) {
 		name           string
 		authenticated  bool
 		expectedStatus int
+		envSessionName string
 	}{
-		{"Authenticated Session", true, http.StatusOK},
-		{"Unauthenticated Session", false, http.StatusUnauthorized},
+		{"Authenticated Session", true, http.StatusOK, "test-session"},
+		{"Unauthenticated Session", false, http.StatusUnauthorized, "test-session"},
+		{"Authenticated Session with Default Name", true, http.StatusOK, ""},
+		{"Unauthenticated Session with Default Name", false, http.StatusUnauthorized, ""},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Set or unset the SESSION_NAME environment variable
+			if tt.envSessionName != "" {
+				t.Setenv("SESSION_NAME", tt.envSessionName)
+			} else {
+				t.Setenv("SESSION_NAME", "")
+			}
+
 			handler := CombinedAuth(apiConfig, sessionConfig)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
 			}))
@@ -80,8 +87,14 @@ func TestSessionAuth(t *testing.T) {
 			req := httptest.NewRequest("GET", "/", nil)
 			rr := httptest.NewRecorder()
 
+			// Determine the session name
+			sessionName := tt.envSessionName
+			if sessionName == "" {
+				sessionName = "default_session_name"
+			}
+
 			// Create a session and set the authenticated value
-			session, err := store.New(req, sessionConfig.SessionName)
+			session, err := store.New(req, sessionName)
 			require.NoError(t, err, "Failed to create new session")
 
 			session.Values["authenticated"] = tt.authenticated
@@ -104,26 +117,33 @@ func TestCombinedAuth(t *testing.T) {
 		},
 	}
 
-	sessionConfig := SessionConfig{
-		SessionName: "test-session",
-		CookieStore: store,
-	}
+	sessionConfig := NewSessionConfig(store)
 
 	tests := []struct {
 		name           string
 		apiKey         string
 		authenticated  bool
 		expectedStatus int
+		envSessionName string
 	}{
-		{"Valid API Key", "valid-key", false, http.StatusOK},
-		{"Invalid API Key, Authenticated Session", "invalid-key", true, http.StatusOK},
-		{"Invalid API Key, Unauthenticated Session", "invalid-key", false, http.StatusUnauthorized},
-		{"No API Key, Authenticated Session", "", true, http.StatusOK},
-		{"No API Key, Unauthenticated Session", "", false, http.StatusUnauthorized},
+		{"Valid API Key", "valid-key", false, http.StatusOK, "test-session"},
+		{"Invalid API Key, Authenticated Session", "invalid-key", true, http.StatusOK, "test-session"},
+		{"Invalid API Key, Unauthenticated Session", "invalid-key", false, http.StatusUnauthorized, "test-session"},
+		{"No API Key, Authenticated Session", "", true, http.StatusOK, "test-session"},
+		{"No API Key, Unauthenticated Session", "", false, http.StatusUnauthorized, "test-session"},
+		{"Valid API Key with Default Session Name", "valid-key", false, http.StatusOK, ""},
+		{"Authenticated Session with Default Session Name", "", true, http.StatusOK, ""},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Set or unset the SESSION_NAME environment variable
+			if tt.envSessionName != "" {
+				t.Setenv("SESSION_NAME", tt.envSessionName)
+			} else {
+				t.Setenv("SESSION_NAME", "")
+			}
+
 			handler := CombinedAuth(apiConfig, sessionConfig)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
 			}))
@@ -134,8 +154,14 @@ func TestCombinedAuth(t *testing.T) {
 			}
 			rr := httptest.NewRecorder()
 
+			// Determine the session name
+			sessionName := tt.envSessionName
+			if sessionName == "" {
+				sessionName = "default_session_name"
+			}
+
 			// Create a session and set the authenticated value
-			session, err := store.New(req, sessionConfig.SessionName)
+			session, err := store.New(req, sessionName)
 			require.NoError(t, err, "Failed to create new session")
 
 			session.Values["authenticated"] = tt.authenticated
