@@ -74,7 +74,7 @@ func TestGetAll(t *testing.T) {
 	}
 	mockRepo.SetArticles(testArticles)
 
-	result, err := service.GetAll(ctx)
+	result, err := service.GetAll(ctx, nil)
 
 	assert.NoError(t, err)
 	assert.Len(t, result, 2)
@@ -144,7 +144,7 @@ func TestGetByTags(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			arts, err := service.GetByTags(ctx, tt.tags)
+			arts, err := service.GetByTags(ctx, tt.tags, nil)
 
 			assert.NoError(t, err)
 			assert.Len(t, arts, tt.expectedCount)
