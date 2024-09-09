@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 )
@@ -43,6 +44,22 @@ type Article struct {
 }
 
 type Articles []Article
+
+// Sort sorts the Articles slice based on the given SortOption
+func (a Articles) Sort(option SortOption) {
+	sort.Slice(a, func(i, j int) bool {
+		switch option {
+		case SortByTitle:
+			return a[i].Title < a[j].Title
+		case SortByPublicationDate:
+			return a[i].PublicationDate.Before(a[j].PublicationDate)
+		case SortByID:
+			return a[i].ID < a[j].ID
+		default:
+			return false
+		}
+	})
+}
 
 type ArticleRepository interface {
 	Create(ctx context.Context, article Article) (*Article, error)
