@@ -5,33 +5,25 @@ import "github.com/jannawro/blog/article"
 templ Index(articles []article.Article) {
     @Page("Blog Index") {
         <div class="container mx-auto px-4">
-            <div class="flex flex-wrap">
-                <header class="w-1/2 pr-4">
-                    <h1 class="text-6xl font-bold uppercase text-[#1a1a1a]">Blog Title</h1>
-                    <p class="text-xl text-[#1a1a1a] mt-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                </header>
-                
-                <main class="w-1/2">
-                    if len(articles) > 0 {
+            <div class="flex flex-wrap -mx-4">
+                <div class="w-1/2 px-4">
+                    <header class="mb-12">
+                        <h1 class="text-6xl font-bold uppercase text-[#1a1a1a]">Blog Title</h1>
+                        <p class="text-xl text-[#1a1a1a] mt-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                    </header>
+                    for i := 1; i < len(articles); i += 2 {
                         <div class="mb-12">
-                            @ArticleCard(articles[0])
-                        </div>
-                    }
-                </main>
-            </div>
-            
-            <div class="flex flex-wrap mt-12">
-                for i := 1; i < len(articles); i++ {
-                    if i % 2 == 1 {
-                        <div class="w-1/2 pr-4 mb-12">
-                            @ArticleCard(articles[i])
-                        </div>
-                    } else {
-                        <div class="w-1/2 pl-4 mb-12">
                             @ArticleCard(articles[i])
                         </div>
                     }
-                }
+                </div>
+                <div class="w-1/2 px-4">
+                    for i := 0; i < len(articles); i += 2 {
+                        <div class="mb-12">
+                            @ArticleCard(articles[i])
+                        </div>
+                    }
+                </div>
             </div>
         </div>
     }
