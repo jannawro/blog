@@ -56,9 +56,9 @@ type ArticleRepository interface {
 
 type ArticleService interface {
 	Create(ctx context.Context, article []byte) (*Article, error)
-	GetAll(ctx context.Context, sortBy SortOption) (Articles, error)
+	GetAll(ctx context.Context, sortBy *SortOption) (Articles, error)
 	GetByTitle(ctx context.Context, title string) (*Article, error)
-	GetByTags(ctx context.Context, tags []string, sortBy SortOption) (Articles, error)
+	GetByTags(ctx context.Context, tags []string, sortBy *SortOption) (Articles, error)
 	UpdateByTitle(ctx context.Context, title string, updated []byte) (*Article, error)
 	DeleteByTitle(ctx context.Context, title string) error
 }
