@@ -51,9 +51,15 @@ func TestAPIKeyAuth(t *testing.T) {
 
 func TestSessionAuth(t *testing.T) {
 	store = sessions.NewCookieStore([]byte("test-secret"))
-	config := SessionConfig{
+	sessionConfig := SessionConfig{
 		SessionName: "test-session",
 		CookieStore: store,
+	}
+
+	// Create a dummy APIKeyConfig
+	apiConfig := APIKeyConfig{
+		KeyName: "X-API-Key",
+		Keys:    map[string]bool{},
 	}
 
 	tests := []struct {
@@ -67,7 +73,7 @@ func TestSessionAuth(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			handler := SessionAuth(config)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			handler := CombinedAuth(apiConfig, sessionConfig)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusOK)
 			}))
 
@@ -75,7 +81,7 @@ func TestSessionAuth(t *testing.T) {
 			rr := httptest.NewRecorder()
 
 			// Create a session and set the authenticated value
-			session, err := store.New(req, config.SessionName)
+			session, err := store.New(req, sessionConfig.SessionName)
 			require.NoError(t, err, "Failed to create new session")
 
 			session.Values["authenticated"] = tt.authenticated
