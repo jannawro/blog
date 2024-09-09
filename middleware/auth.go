@@ -2,13 +2,19 @@ package middleware
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/gorilla/sessions"
 )
 
 type SessionConfig struct {
-	SessionName string
 	CookieStore *sessions.CookieStore
+}
+
+func NewSessionConfig(cookieStore *sessions.CookieStore) *SessionConfig {
+	return &SessionConfig{
+		CookieStore: cookieStore,
+	}
 }
 
 type APIKeyConfig struct {
@@ -35,7 +41,7 @@ func APIKeyAuth(config APIKeyConfig) Middleware {
 	}
 }
 
-func CombinedAuth(apiConfig APIKeyConfig, sessionConfig SessionConfig) Middleware {
+func CombinedAuth(apiConfig APIKeyConfig, sessionConfig *SessionConfig) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// Check for API key first
@@ -48,7 +54,12 @@ func CombinedAuth(apiConfig APIKeyConfig, sessionConfig SessionConfig) Middlewar
 			}
 
 			// If no valid API key, check for session
-			session, err := sessionConfig.CookieStore.Get(r, sessionConfig.SessionName)
+			sessionName := os.Getenv("SESSION_NAME")
+			if sessionName == "" {
+				sessionName = "default_session_name" // fallback
+			}
+
+			session, err := sessionConfig.CookieStore.Get(r, sessionName)
 			if err != nil {
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
