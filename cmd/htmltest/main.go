@@ -9,6 +9,7 @@ import (
 
 	"github.com/jannawro/blog/article"
 	"github.com/jannawro/blog/views/components"
+	"github.com/jannawro/blog/views/pages"
 )
 
 func main() {
@@ -22,6 +23,7 @@ func main() {
 	}
 
 	// Render the ArticleCard component
+	indexPage := pages.Index()
 	component := components.ArticleCard(sampleArticle)
 
 	// Create a context
