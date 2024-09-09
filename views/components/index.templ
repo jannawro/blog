@@ -3,28 +3,30 @@ package components
 import "github.com/jannawro/blog/article"
 
 templ Index(articles []article.Article) {
-	@Page("Blog Index") {
-		<div class="container mx-auto px-4">
-			<header class="mb-12 mt-8">
-				<h1 class="text-6xl font-bold uppercase text-[#1a1a1a]">Blog Title</h1>
-				<p class="text-xl text-[#1a1a1a] mt-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-			</header>
-			<main>
-				for i, article := range articles {
-					<div class={ "flex mb-12" , ternary(i%2==0, "justify-start" , "justify-end" ) }>
-						<div class={ "w-3/4" , ternary(i%2==0, "" , "ml-auto" ) }>
-							@ArticleCard(article)
-						</div>
-					</div>
-				}
-			</main>
-		</div>
-	}
-}
-
-func ternary(condition bool, trueValue, falseValue string) string {
-	if condition {
-		return trueValue
-	}
-	return falseValue
+    @Page("Blog Index") {
+        <div class="container mx-auto px-4 flex flex-wrap">
+            <header class="w-1/2 pr-4 mb-12 mt-8">
+                <h1 class="text-6xl font-bold uppercase text-[#1a1a1a]">Blog Title</h1>
+                <p class="text-xl text-[#1a1a1a] mt-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            </header>
+            
+            <main class="w-full">
+                for i, article := range articles {
+                    if i == 0 {
+                        <div class="w-1/2 ml-auto mb-12">
+                            @ArticleCard(article)
+                        </div>
+                    } else if i % 2 == 1 {
+                        <div class="w-1/2 mr-auto mb-12">
+                            @ArticleCard(article)
+                        </div>
+                    } else {
+                        <div class="w-1/2 ml-auto mb-12">
+                            @ArticleCard(article)
+                        </div>
+                    }
+                }
+            </main>
+        </div>
+    }
 }
