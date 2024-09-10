@@ -12,8 +12,13 @@ templ Home(articles []article.Article) {
 			<div class="flex flex-wrap -mx-4">
 				<div class="w-full md:w-1/2 px-4">
 					<div class="hidden md:block mb-12">
-						<h1 class="text-6xl font-bold uppercase text-[#1a1a1a]">A <span class="text-[#FF0000]">RED</span> DOOR</h1>
-						<p class="text-xl text-[#1a1a1a] mt-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+						<h1 class="text-6xl font-bold uppercase text-[#1a1a1a]">
+							A <span class="text-[#FF0000]">RED</span> DOOR
+						</h1>
+						<p class="text-xl text-[#1a1a1a] mt-4">
+							A <span class="text-[#FF0000]">red</span> door is the threshold
+							between the real and the imaginary. The perfect place to put what I think and do. So I do.
+						</p>
 					</div>
 					for i, article := range articles {
 						if i % 2 == 1 {
