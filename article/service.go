@@ -80,3 +80,7 @@ func (s *Service) DeleteByTitle(ctx context.Context, title string) error {
 	}
 	return s.repo.Delete(ctx, article.ID)
 }
+
+func (s *Service) GetAllTags(ctx context.Context) ([]string, error) {
+	return s.repo.GetAllTags(ctx)
+}

@@ -64,6 +64,23 @@ This is the content of the test article.`),
 	}
 }
 
+func TestGetAllTags(t *testing.T) {
+	service, mockRepo := setupTestService()
+	ctx := context.Background()
+
+	testArticles := []article1.Article{
+		{ID: 1, Title: "Article 1", Tags: []string{"tag1", "tag2"}},
+		{ID: 2, Title: "Article 2", Tags: []string{"tag2", "tag3"}},
+		{ID: 3, Title: "Article 3", Tags: []string{"tag1", "tag3", "tag4"}},
+	}
+	mockRepo.SetArticles(testArticles)
+
+	tags, err := service.GetAllTags(ctx)
+
+	assert.NoError(t, err)
+	assert.ElementsMatch(t, []string{"tag1", "tag2", "tag3", "tag4"}, tags)
+}
+
 func TestGetAll(t *testing.T) {
 	service, mockRepo := setupTestService()
 	ctx := context.Background()
