@@ -6,7 +6,7 @@ templ Page(title string) {
 		<head>
 			<meta charset="UTF-8"/>
 			<title>{ title }</title>
-			<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+			<link rel="icon" type="image/png" href="/static/favicon.png"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
 			<meta name="robots" content="index, follow"/>
 			<meta name="revisit-after" content="7 days"/>
@@ -14,12 +14,20 @@ templ Page(title string) {
 			<script src="https://unpkg.com/htmx.org@1.9.11" integrity="sha384-0gxUXCCR8yv9FM2b+U3FDbsKthCI66oH5IA9fHppQq9DDMHuMauqq1ZHBpJxQ0J0" crossorigin="anonymous"></script>
 			<link rel="stylesheet" href="/static/styles.css"/>
 			<style>
-				@keyframes gradient {
-					0% { background-position: 0% 50%; }
-					50% { background-position: 100% 50%; }
-					100% { background-position: 0% 50%; }
-				}
-			</style>
+		@keyframes gradient {
+			0% {
+				background-position: 0% 50%;
+			}
+
+			50% {
+				background-position: 100% 50%;
+			}
+
+			100% {
+				background-position: 0% 50%;
+			}
+		}
+	</style>
 		</head>
 		<body
 			class="min-h-screen bg-gradient-to-bl from-white to-gray-300 bg-[length:400%_400%] animate-[gradient_15s_ease_infinite]"
