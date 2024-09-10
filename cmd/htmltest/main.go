@@ -16,7 +16,7 @@ func main() {
 	sampleArticle := article.Article{
 		ID:              1,
 		Title:           "Sample Article",
-		Content:         "This is a sample article content. It's long enough to be truncated in the card view.",
+		Content:         "This is a sample article **content**. It's long enough to be truncated in the card view.",
 		Tags:            []string{"sample", "test"},
 		PublicationDate: time.Now(),
 	}
@@ -31,7 +31,7 @@ func main() {
 		{
 			ID:              2,
 			Title:           "Article 2",
-			Content:         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+			Content:         "**Lorem** ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
 			Tags:            []string{"lorem", "ipsum"},
 			PublicationDate: time.Now(),
 		},
@@ -58,16 +58,16 @@ func main() {
 		},
 	}
 	// Render the ArticleCard component
-	_ = components.Home(sampleArticles)
+	homePage := components.Home(sampleArticles)
 	_ = components.ArticleCard(sampleArticle)
-	page := components.ArticleContentPage(sampleArticle)
+	_ = components.ArticleContentPage(sampleArticle)
 
 	// Create a context
 	ctx := context.Background()
 
 	// Render the component to HTML
 	var html bytes.Buffer
-	err := page.Render(ctx, &html)
+	err := homePage.Render(ctx, &html)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error rendering component: %v\n", err)
 		os.Exit(1)
