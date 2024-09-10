@@ -99,6 +99,36 @@ func (q *Queries) GetAllArticles(ctx context.Context) ([]Article, error) {
 	return items, nil
 }
 
+const getAllTags = `-- name: GetAllTags :many
+SELECT DISTINCT unnest(tags)::TEXT AS unique_tag
+FROM articles
+WHERE tags IS NOT NULL
+ORDER BY unique_tag ASC
+`
+
+func (q *Queries) GetAllTags(ctx context.Context) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, getAllTags)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var unique_tag string
+		if err := rows.Scan(&unique_tag); err != nil {
+			return nil, err
+		}
+		items = append(items, unique_tag)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getArticleByID = `-- name: GetArticleByID :one
 SELECT id, title, content, tags, publication_date, created_at, updated_at FROM articles
 WHERE id = $1 LIMIT 1

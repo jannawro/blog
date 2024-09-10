@@ -41,6 +41,7 @@ type ArticleRepository interface {
 	GetByID(ctx context.Context, id int64) (*Article, error)
 	GetByTitle(ctx context.Context, title string) (*Article, error)
 	GetByTags(ctx context.Context, tags []string) (Articles, error)
+	GetAllTags(ctx context.Context) ([]string, error)
 	Update(ctx context.Context, id int64, updated Article) (*Article, error)
 	Delete(ctx context.Context, id int64) error
 }

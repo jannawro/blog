@@ -18,6 +18,12 @@ WHERE title = $1 LIMIT 1;
 SELECT * FROM articles
 WHERE tags && sqlc.arg(tags)::text[];
 
+-- name: GetAllTags :many
+SELECT DISTINCT unnest(tags)::TEXT AS unique_tag
+FROM articles
+WHERE tags IS NOT NULL
+ORDER BY unique_tag ASC;
+
 -- name: UpdateArticleByID :one
 UPDATE articles
 SET title = $1,
