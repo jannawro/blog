@@ -9,7 +9,7 @@ import (
 templ ArticleContentPage(a article.Article) {
 	@Page("Article - " + a.Title) {
 		<div class="min-h-screen bg-[#f5f5f5] text-[#1a1a1a] flex justify-center items-center p-4">
-			<div class="max-w-3xl w-full border-4 border-[#1a1a1a] p-8 bg-[#f5f5f5] shadow-lg">
+			<div class="max-w-3xl w-full p-8 bg-[#f5f5f5] shadow-lg">
 				<h1 class="text-4xl font-bold mb-6 uppercase text-[#1a1a1a]">{ a.Title }</h1>
 				<div class="mb-4">
 					<span class="text-lg font-bold text-[#1a1a1a]">{ a.PublicationDate.Format("2006-01-02") }</span>
