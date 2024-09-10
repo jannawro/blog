@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/jannawro/blog/article"
-	"github.com/jannawro/blog/views/components"
+	"github.com/jannawro/blog/components"
 )
 
 func main() {
@@ -58,16 +58,16 @@ func main() {
 		},
 	}
 	// Render the ArticleCard component
-	homePage := components.Home(sampleArticles)
+	blogPage := components.Blog(sampleArticles)
 	_ = components.ArticleCard(sampleArticle)
-	_ = components.ArticleContentPage(sampleArticle)
+	_ = components.ArticlePage(sampleArticle)
 
 	// Create a context
 	ctx := context.Background()
 
 	// Render the component to HTML
 	var html bytes.Buffer
-	err := homePage.Render(ctx, &html)
+	err := blogPage.Render(ctx, &html)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error rendering component: %v\n", err)
 		os.Exit(1)
