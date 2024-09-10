@@ -42,27 +42,13 @@ func parseArguments() {
 	flag.StringVar(&port, "port", "8888", "The port the server should listen on. The default is 8888.")
 }
 
-func articleHandler(repo article.ArticleRepository) func(http.ResponseWriter, *http.Request) {
+func placeholderHandler() func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id := chi.URLParam(r, "id")
-		articleID, err := strconv.ParseInt(id, 10, 64)
+		response := "You called a placeholder!"
+		log.Println(response)
+		_, err := w.Write([]byte(response))
 		if err != nil {
-			http.Error(w, "Invalid article ID", http.StatusBadRequest)
-			return
-		}
-
-		ctx := r.Context()
-		a, err := repo.GetByID(ctx, articleID)
-		if err != nil {
-			http.Error(w, "Article not found", http.StatusNotFound)
-			return
-		}
-
-		component := pages.ArticlePage(*a)
-		err = component.Render(ctx, w)
-		if err != nil {
-			http.Error(w, "Error rendering page", http.StatusInternalServerError)
-			return
+			panic(err)
 		}
 	}
 }
