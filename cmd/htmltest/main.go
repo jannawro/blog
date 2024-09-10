@@ -58,15 +58,16 @@ func main() {
 		},
 	}
 	// Render the ArticleCard component
-	homePage := components.Home(sampleArticles)
+	_ = components.Home(sampleArticles)
 	_ = components.ArticleCard(sampleArticle)
+	page := components.ArticleContentPage(sampleArticle)
 
 	// Create a context
 	ctx := context.Background()
 
 	// Render the component to HTML
 	var html bytes.Buffer
-	err := homePage.Render(ctx, &html)
+	err := page.Render(ctx, &html)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error rendering component: %v\n", err)
 		os.Exit(1)
