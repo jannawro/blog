@@ -186,3 +186,7 @@ func (r *PostgresqlRepository) Delete(ctx context.Context, id int64) error {
 
 	return tx.Commit()
 }
+
+func (r *PostgresqlRepository) GetAllTags(ctx context.Context) ([]string, error) {
+	return r.q.GetAllTags(ctx)
+}
