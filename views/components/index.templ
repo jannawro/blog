@@ -15,21 +15,17 @@ templ Home(articles []article.Article) {
                         <h1 class="text-6xl font-bold uppercase text-[#1a1a1a]">A <span class="text-[#FF0000]">RED</span> DOOR</h1>
                         <p class="text-xl text-[#1a1a1a] mt-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
                     </div>
-                    for i := 0; i < len(articles); i++ {
-                        if i % 2 == 0 || len(articles) == 1 {
-                            <div class="mb-12">
-                                @ArticleCard(articles[i])
-                            </div>
-                        }
+                    for i := 0; i < len(articles); i += 2 {
+                        <div class="mb-12">
+                            @ArticleCard(articles[i])
+                        </div>
                     }
                 </div>
                 <div class="hidden md:block md:w-1/2 px-4">
-                    for i := 0; i < len(articles); i++ {
-                        if i % 2 == 1 {
-                            <div class="mb-12">
-                                @ArticleCard(articles[i])
-                            </div>
-                        }
+                    for i := 1; i < len(articles); i += 2 {
+                        <div class="mb-12">
+                            @ArticleCard(articles[i])
+                        </div>
                     }
                 </div>
             </div>
