@@ -7,7 +7,6 @@ import (
 	"os"
 
 	"github.com/jannawro/blog/article"
-	. "github.com/jannawro/blog/repository"
 )
 
 type PostgresqlRepository struct {
