@@ -3,18 +3,17 @@ package components
 import (
 	"fmt"
 	"github.com/jannawro/blog/article"
+	"github.com/gomarkdown/markdown"
+	"github.com/gomarkdown/markdown/parser"
+	"html/template"
 )
 
 templ ArticleCard(a article.Article) {
 	<div class="border-4 border-[#1a1a1a] mb-8 p-4 bg-[#f5f5f5] shadow-lg hover:shadow-xl transition-shadow duration-300">
 		<h2 class="text-4xl font-bold mb-4 uppercase text-[#1a1a1a]">{ a.Title }</h2>
-		<p class="mb-4 text-lg text-[#1a1a1a]">
-			if len(a.Content) > 150 {
-				{ a.Content[:150] + "..." }
-			} else {
-				{ a.Content }
-			}
-		</p>
+		<div class="mb-4 text-lg text-[#1a1a1a] prose">
+			@templ.Raw(truncateHTML(markdown.ToHTML([]byte(a.Content), parser.NewWithExtensions(parser.CommonExtensions), nil), 150))
+		</div>
 		<div class="mb-4">
 			<span class="text-lg font-bold mr-4 text-[#1a1a1a]">{ a.PublicationDate.Format("2006-01-02") }</span>
 			<div class="flex flex-wrap">
@@ -27,4 +26,19 @@ templ ArticleCard(a article.Article) {
 			READ MORE
 		</a>
 	</div>
+}
+
+func truncateHTML(input []byte, maxLength int) template.HTML {
+	html := string(input)
+	if len(html) <= maxLength {
+		return template.HTML(html)
+	}
+
+	truncated := html[:maxLength]
+	lastSpaceIndex := strings.LastIndex(truncated, " ")
+	if lastSpaceIndex != -1 {
+		truncated = truncated[:lastSpaceIndex]
+	}
+
+	return template.HTML(truncated + "...")
 }
