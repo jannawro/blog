@@ -124,6 +124,24 @@ func (m *MockRepository) Reset() {
 	m.nextID = 1
 }
 
+func (m *MockRepository) GetAllTags(ctx context.Context) ([]string, error) {
+	m.mutex.RLock()
+	defer m.mutex.RUnlock()
+
+	tagSet := make(map[string]struct{})
+	for _, article := range m.articles {
+		for _, tag := range article.Tags {
+			tagSet[tag] = struct{}{}
+		}
+	}
+
+	tags := make([]string, 0, len(tagSet))
+	for tag := range tagSet {
+		tags = append(tags, tag)
+	}
+	return tags, nil
+}
+
 func containsAllTags(articleTags, searchTags []string) bool {
 	tagSet := make(map[string]struct{})
 	for _, tag := range articleTags {
