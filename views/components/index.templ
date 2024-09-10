@@ -3,31 +3,32 @@ package components
 import "github.com/jannawro/blog/article"
 
 templ Home(articles []article.Article) {
-@Page("Home") {
-<div class="container mx-auto px-4">
-    <div class="md:hidden mb-12">
-        <h1 class="text-6xl font-bold uppercase text-[#1a1a1a]">A <span class="text-[#FF0000]">RED</span> DOOR</h1>
-        <p class="text-xl text-[#1a1a1a] mt-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-    </div>
-    <div class="flex flex-wrap -mx-4">
-        <div class="w-full md:w-1/2 px-4">
-            <div class="hidden md:block mb-12">
-                <h1 class="text-6xl font-bold uppercase text-[#1a1a1a]">A <span class="text-[#FF0000]">RED</span> DOOR
-                </h1>
+    @Page("Home") {
+        <div class="container mx-auto px-4">
+            <div class="md:hidden mb-12">
+                <h1 class="text-6xl font-bold uppercase text-[#1a1a1a]">A <span class="text-[#FF0000]">RED</span> DOOR</h1>
                 <p class="text-xl text-[#1a1a1a] mt-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
             </div>
-            for i := 0; i < len(articles); i +=2 { <div class="mb-12">
-                @ArticleCard(articles[i])
+            <div class="flex flex-wrap -mx-4">
+                <div class="w-full md:w-1/2 px-4">
+                    <div class="hidden md:block mb-12">
+                        <h1 class="text-6xl font-bold uppercase text-[#1a1a1a]">A <span class="text-[#FF0000]">RED</span> DOOR</h1>
+                        <p class="text-xl text-[#1a1a1a] mt-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                    </div>
+                    for i := 0; i < len(articles); i += 2 {
+                        <div class="mb-12">
+                            @ArticleCard(articles[i])
+                        </div>
+                    }
+                </div>
+                <div class="hidden md:block md:w-1/2 px-4">
+                    for i := 1; i < len(articles); i += 2 {
+                        <div class="mb-12">
+                            @ArticleCard(articles[i])
+                        </div>
+                    }
+                </div>
+            </div>
         </div>
-        }
-    </div>
-    <div class="hidden md:block md:w-1/2 px-4">
-        for i := 1; i < len(articles); i +=2 { <div class="mb-12">
-            @ArticleCard(articles[i])
-    </div>
     }
-</div>
-</div>
-</div>
-}
 }
