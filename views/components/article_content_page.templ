@@ -11,7 +11,7 @@ templ ArticleContentPage(a article.Article) {
 					<span class="text-lg">{ a.PublicationDate.Format("2006-01-02") }</span>
 					<div class="flex flex-wrap mt-2">
 						for _, tag := range a.Tags {
-							<span class="border border-[#f5d000] px-2 py-1 text-sm font-bold mr-2 mb-2 uppercase">{ tag }</span>
+							<span class="border-2 border-[#1a1a1a] px-2 py-1 text-sm font-bold mr-2 mb-2 uppercase">{ tag }</span>
 						}
 					</div>
 				</div>
