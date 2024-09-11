@@ -1,17 +1,13 @@
 package components
 
-import (
-	"github.com/idiomdrottning/idiomdrottning/models"
-)
+import "github.com/jannawro/blog/article"
 
-type TaggedArticles map[string][]models.Article
-
-templ TagIndexPage(taggedArticles TaggedArticles) {
-	@Page("Tag Index") {
+templ TagIndexPage(taggedArticles map[string][]article.Article) {
+	@Page("Index") {
 		<div class="min-h-screen bg-gray-100">
 			<header class="bg-white shadow">
 				<div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-					<h1 class="text-3xl font-bold text-gray-900">IDIOMDROTTNING</h1>
+					<h1 class="text-3xl font-bold text-gray-900">A RED DOOR</h1>
 				</div>
 			</header>
 			<main>
@@ -21,12 +17,15 @@ templ TagIndexPage(taggedArticles TaggedArticles) {
 							for tag, articles := range taggedArticles {
 								<div class="bg-white overflow-hidden shadow rounded-lg">
 									<div class="px-4 py-5 sm:p-6">
-										<h2 class="text-lg font-medium text-gray-900 mb-4">{tag}</h2>
+										<h2 class="text-lg font-medium text-gray-900 mb-4">{ tag }</h2>
 										<ul class="space-y-2">
 											for _, article := range articles {
 												<li>
-													<a href={templ.SafeURL("/article/" + article.Title)} class="text-sm text-blue-600 hover:text-blue-800 hover:underline">
-														{article.Title}
+													<a
+														href={ templ.SafeURL("/article/" + article.Title) }
+														class="text-sm text-blue-600 hover:text-blue-800 hover:underline"
+													>
+														{ article.Title }
 													</a>
 												</li>
 											}
