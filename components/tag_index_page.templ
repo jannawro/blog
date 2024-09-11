@@ -1,10 +1,10 @@
 package components
 
 import (
-	"github.com/idiomdrottning/idiomdrottning/article"
+	"github.com/idiomdrottning/idiomdrottning/models"
 )
 
-type TaggedArticles map[string][]article.Article
+type TaggedArticles map[string][]models.Article
 
 templ TagIndexPage(taggedArticles TaggedArticles) {
 	@Page("Tag Index") {
