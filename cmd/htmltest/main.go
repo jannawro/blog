@@ -13,11 +13,25 @@ import (
 
 func main() {
 	// Create a sample article
-	sampleArticle := article.Article{
+	article1 := article.Article{
 		ID:              1,
-		Title:           "Sample Article",
+		Title:           "Sample Article 1",
 		Content:         "This is a sample article **content**. It's long enough to be truncated in the card view.",
-		Tags:            []string{"sample", "test"},
+		Tags:            []string{"sample", "test", "article1"},
+		PublicationDate: time.Now(),
+	}
+	article2 := article.Article{
+		ID:              2,
+		Title:           "Sample Article 2",
+		Content:         "This is a sample article **content**. It's long enough to be truncated in the card view.",
+		Tags:            []string{"sample", "test", "article2"},
+		PublicationDate: time.Now(),
+	}
+	article3 := article.Article{
+		ID:              3,
+		Title:           "Sample Article 3",
+		Content:         "This is a sample article **content**. It's long enough to be truncated in the card view.",
+		Tags:            []string{"sample", "test", "article3"},
 		PublicationDate: time.Now(),
 	}
 	sampleArticles := []article.Article{
@@ -57,17 +71,25 @@ func main() {
 			PublicationDate: time.Now(),
 		},
 	}
-	// Render the ArticleCard component
-	blogPage := components.Blog(sampleArticles)
-	_ = components.ArticleCard(sampleArticle)
-	_ = components.ArticlePage(sampleArticle)
+	taggedArticles := map[string][]article.Article{
+		"sample":   {article1, article2, article3},
+		"test":     {article1, article2, article3},
+		"article1": {article1},
+		"article2": {article2},
+		"article3": {article3},
+	}
+
+	_ = components.Blog(sampleArticles)
+	_ = components.ArticleCard(article1)
+	_ = components.ArticlePage(article1)
+	indexPage := components.TagIndexPage(taggedArticles)
 
 	// Create a context
 	ctx := context.Background()
 
 	// Render the component to HTML
 	var html bytes.Buffer
-	err := blogPage.Render(ctx, &html)
+	err := indexPage.Render(ctx, &html)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error rendering component: %v\n", err)
 		os.Exit(1)
