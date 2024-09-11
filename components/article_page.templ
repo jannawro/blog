@@ -10,10 +10,10 @@ templ ArticlePage(a article.Article) {
 	@Page(a.Title) {
 		<div class="min-h-screen bg-[#f5f5f5] text-[#1a1a1a] flex justify-center">
 			<div class="w-full max-w-3xl bg-white shadow-lg flex flex-col">
-				<div class="w-full">
-					<img src="/static/red_door.png" alt="Red Door" class="w-full h-auto object-cover" />
+				<div class="w-full flex justify-center p-8 pb-0">
+					<img src="/static/red_door.png" alt="Red Door" class="max-w-full h-auto object-cover" />
 				</div>
-				<div class="flex-grow flex flex-col justify-center p-8">
+				<div class="flex-grow flex flex-col p-8">
 					<h1 class="text-4xl font-bold mb-6 uppercase text-[#1a1a1a]">{ a.Title }</h1>
 					<div class="mb-4">
 						<span class="text-lg font-bold text-[#1a1a1a]">{ a.PublicationDate.Format("2006-01-02") }</span>
