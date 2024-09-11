@@ -8,19 +8,21 @@ import (
 
 templ ArticlePage(a article.Article) {
 	@Page(a.Title) {
-		<div class="min-h-screen bg-[#f5f5f5] text-[#1a1a1a] flex justify-center items-center p-4">
-			<div class="max-w-3xl w-full p-8 bg-[#f5f5f5] shadow-lg">
-				<h1 class="text-4xl font-bold mb-6 uppercase text-[#1a1a1a]">{ a.Title }</h1>
-				<div class="mb-4">
-					<span class="text-lg font-bold text-[#1a1a1a]">{ a.PublicationDate.Format("2006-01-02") }</span>
-					<div class="flex flex-wrap mt-2">
-						for _, tag := range a.Tags {
-							<span class="border-2 border-[#1a1a1a] px-2 py-1 text-sm font-bold mr-2 mb-2 uppercase text-[#1a1a1a]">{ tag }</span>
-						}
+		<div class="min-h-screen bg-[#f5f5f5] text-[#1a1a1a] flex justify-center">
+			<div class="w-full max-w-3xl bg-white shadow-lg flex flex-col">
+				<div class="flex-grow flex flex-col justify-center p-8">
+					<h1 class="text-4xl font-bold mb-6 uppercase text-[#1a1a1a] text-center">{ a.Title }</h1>
+					<div class="mb-4 text-center">
+						<span class="text-lg font-bold text-[#1a1a1a]">{ a.PublicationDate.Format("2006-01-02") }</span>
+						<div class="flex flex-wrap justify-center mt-2">
+							for _, tag := range a.Tags {
+								<span class="border-2 border-[#1a1a1a] px-2 py-1 text-sm font-bold mr-2 mb-2 uppercase text-[#1a1a1a]">{ tag }</span>
+							}
+						</div>
 					</div>
-				</div>
-				<div class="prose max-w-none text-[#1a1a1a]">
-					@templ.Raw(string(markdown.ToHTML([]byte(a.Content), parser.NewWithExtensions(parser.CommonExtensions), nil)))
+					<div class="prose max-w-none text-[#1a1a1a]">
+						@templ.Raw(string(markdown.ToHTML([]byte(a.Content), parser.NewWithExtensions(parser.CommonExtensions), nil)))
+					</div>
 				</div>
 			</div>
 		</div>
