@@ -19,7 +19,7 @@ templ ArticlePage(a article.Article) {
 						<span class="text-lg font-bold text-[#1a1a1a]">{ a.PublicationDate.Format("2006-01-02") }</span>
 						<div class="flex flex-wrap mt-2">
 							for _, tag := range a.Tags {
-								<span class="border-2 border-[#1a1a1a] px-2 py-1 text-sm font-bold mr-2 mb-2 uppercase text-[#1a1a1a]">{ tag }</span>
+								@Tag(tag)
 							}
 						</div>
 					</div>
