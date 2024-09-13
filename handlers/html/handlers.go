@@ -102,3 +102,37 @@ func getSortOption(r *http.Request) a.SortOption {
 		return a.SortByPublicationDate
 	}
 }
+
+func (h *Handler) ServeIndex() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		// Fetch all tags
+		tags, err := h.service.GetAllTags(ctx)
+		if err != nil {
+			http.Error(w, "Failed to fetch tags", http.StatusInternalServerError)
+			return
+		}
+
+		// Initialize map for tagged articles
+		taggedArticles := make(map[string][]a.Article)
+
+		// Fetch articles for each tag
+		for _, tag := range tags {
+			articles, err := h.service.GetByTags(ctx, []string{tag}, nil)
+			if err != nil {
+				http.Error(w, "Failed to fetch articles for tag: "+tag, http.StatusInternalServerError)
+				return
+			}
+			taggedArticles[tag] = articles
+		}
+
+		// Create and render TagIndexPage component
+		indexPage := components.TagIndexPage(taggedArticles)
+		err = indexPage.Render(ctx, w)
+		if err != nil {
+			http.Error(w, "Failed to render index page", http.StatusInternalServerError)
+			return
+		}
+	}
+}
