@@ -19,7 +19,8 @@ func (h *Handler) ServeBlog() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		articles, err := h.service.GetAll(ctx, nil) // Assuming no sorting for now
+		sortOption := article.SortByPublicationDate
+		articles, err := h.service.GetAll(ctx, &sortOption)
 		if err != nil {
 			http.Error(w, "Failed to fetch articles", http.StatusInternalServerError)
 			return
