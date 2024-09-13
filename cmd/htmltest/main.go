@@ -81,15 +81,15 @@ func main() {
 
 	_ = components.Blog(sampleArticles)
 	_ = components.ArticleCard(article1)
-	_ = components.ArticlePage(article1)
-	indexPage := components.TagIndexPage(taggedArticles)
+	page := components.ArticlePage(article1)
+	_ = components.TagIndexPage(taggedArticles)
 
 	// Create a context
 	ctx := context.Background()
 
 	// Render the component to HTML
 	var html bytes.Buffer
-	err := indexPage.Render(ctx, &html)
+	err := page.Render(ctx, &html)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error rendering component: %v\n", err)
 		os.Exit(1)
