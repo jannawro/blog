@@ -89,20 +89,6 @@ func (h *Handler) ServeBlog() http.HandlerFunc {
 	}
 }
 
-func getSortOption(r *http.Request) a.SortOption {
-	sortParam := r.URL.Query().Get("sort")
-	switch sortParam {
-	case "title":
-		return a.SortByTitle
-	case "id":
-		return a.SortByID
-	case "date":
-		fallthrough
-	default:
-		return a.SortByPublicationDate
-	}
-}
-
 func (h *Handler) ServeIndex() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -134,5 +120,19 @@ func (h *Handler) ServeIndex() http.HandlerFunc {
 			http.Error(w, "Failed to render index page", http.StatusInternalServerError)
 			return
 		}
+	}
+}
+
+func getSortOption(r *http.Request) a.SortOption {
+	sortParam := r.URL.Query().Get("sort")
+	switch sortParam {
+	case "title":
+		return a.SortByTitle
+	case "id":
+		return a.SortByID
+	case "date":
+		fallthrough
+	default:
+		return a.SortByPublicationDate
 	}
 }
