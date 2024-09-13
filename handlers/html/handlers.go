@@ -1,6 +1,7 @@
 package html
 
 import (
+	"database/sql"
 	"errors"
 	"net/http"
 	"net/url"
@@ -38,7 +39,7 @@ func (h *Handler) ServeArticle() http.HandlerFunc {
 		// Fetch article by title
 		article, err := h.service.GetByTitle(ctx, decodedTitle)
 		if err != nil {
-			if errors.Is(err, article.ErrArticleNotFound) {
+			if errors.Is(err, sql.ErrNoRows) {
 				http.Error(w, "Article not found", http.StatusNotFound)
 			} else {
 				http.Error(w, "Failed to fetch article", http.StatusInternalServerError)
