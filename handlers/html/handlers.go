@@ -19,7 +19,7 @@ func (h *Handler) ServeBlog() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		sortOption := article.SortByPublicationDate
+		sortOption := getSortOption(r)
 		articles, err := h.service.GetAll(ctx, &sortOption)
 		if err != nil {
 			http.Error(w, "Failed to fetch articles", http.StatusInternalServerError)
@@ -33,5 +33,19 @@ func (h *Handler) ServeBlog() http.HandlerFunc {
 			http.Error(w, "Failed to render blog", http.StatusInternalServerError)
 			return
 		}
+	}
+}
+
+func getSortOption(r *http.Request) article.SortOption {
+	sortParam := r.URL.Query().Get("sort")
+	switch sortParam {
+	case "title":
+		return article.SortByTitle
+	case "id":
+		return article.SortByID
+	case "date":
+		fallthrough
+	default:
+		return article.SortByPublicationDate
 	}
 }
