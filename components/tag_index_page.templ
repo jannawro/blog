@@ -1,6 +1,9 @@
 package components
 
-import "github.com/jannawro/blog/article"
+import (
+	"fmt"
+	"github.com/jannawro/blog/article"
+)
 
 templ TagIndexPage(taggedArticles map[string][]article.Article) {
 	@Page("Index") {
@@ -23,7 +26,7 @@ templ TagIndexPage(taggedArticles map[string][]article.Article) {
 								for _, article := range articles {
 									<li>
 										<a
-											href={ templ.SafeURL("/article/" + article.Title) }
+											href={ templ.SafeURL(fmt.Sprintf("/article/%d", article.ID)) }
 											class="text-lg font-bold text-[#1a1a1a] hover:text-[#FF0000] hover:underline transition-colors duration-200"
 										>
 											{ article.Title }

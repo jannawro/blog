@@ -5,15 +5,11 @@ import "github.com/jannawro/blog/article"
 templ Blog(articles []article.Article) {
 	@Page("A red door") {
 		<div class="container mx-auto px-4">
-			<div class="md:hidden mb-12">
-				<h1 class="text-6xl font-bold uppercase text-[#1a1a1a] flex items-center">A <img src="/static/red_door.png" alt="Red Door" class="w-12 h-12 mr-2 inline-block" /> <span class="text-[#FF0000]">RED</span> DOOR</h1>
-				<p class="text-xl text-[#1a1a1a] mt-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-			</div>
 			<div class="flex flex-wrap -mx-4">
 				<div class="w-full md:w-1/2 px-4">
 					<div class="hidden md:block mb-12">
 						<h1 class="text-6xl font-bold uppercase text-[#1a1a1a] flex items-center">
-							A <img src="/static/red_door.png" alt="Red Door" class="w-12 h-12 mr-2 inline-block" /> <span class="text-[#FF0000]">RED</span> DOOR
+							A <img src="/static/red_door_cropped.png" alt="Red Door" class="w-12 h-12 mr-2 inline-block"/> <span class="text-[#FF0000]"> RED </span> DOOR
 						</h1>
 						<p class="text-xl text-[#1a1a1a] mt-4">
 							A <span class="text-[#FF0000]">red</span> door is the threshold

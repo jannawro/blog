@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-//go:embed styles.css favicon.png red_door.png
+//go:embed styles.css favicon.png red_door.png red_door_cropped.png
 var static embed.FS
 
 // Handler returns an http.Handler that serves static assets on "path" endpoint

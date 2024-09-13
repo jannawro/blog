@@ -27,16 +27,16 @@ func main() {
 	router := http.NewServeMux()
 
 	router.Handle("GET /static/", static.Handler("/static/"))
-	router.HandleFunc("GET /", htmlHandler.ServeIndex())
-	router.HandleFunc("GET /blog", htmlHandler.ServeBlog())
-	router.HandleFunc("GET /article/{title}", htmlHandler.ServeArticle())
+	router.HandleFunc("GET /", htmlHandler.ServeBlog())
+	router.HandleFunc("GET /index", htmlHandler.ServeIndex())
+	router.HandleFunc("GET /article/{id}", htmlHandler.ServeArticle())
 
 	stack := middleware.CreateStack(
 		middleware.Logging,
 	)
 
 	server := http.Server{
-		Addr:    port,
+		Addr:    ":" + port,
 		Handler: stack(router),
 	}
 

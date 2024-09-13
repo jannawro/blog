@@ -3,7 +3,6 @@ package article
 import (
 	"context"
 	"errors"
-	"net/http"
 	"strings"
 	"time"
 )
@@ -46,7 +45,9 @@ type ArticleRepository interface {
 	Delete(ctx context.Context, id int64) error
 }
 
-type ArticleHandler http.Handler
+func (a *Article) URLHappyTitle() string {
+	return strings.ReplaceAll(strings.ToLower(a.Title), " ", "-")
+}
 
 // UnmarshalToArticle parses a markdown file with specific headers and stores the result as an article in a
 func UnmarshalToArticle(data []byte, a *Article) error {

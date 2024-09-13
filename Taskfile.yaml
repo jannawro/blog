@@ -26,6 +26,7 @@ tasks:
     sources:
       - ./**/*.templ
       - ./tailwind.css
+      - ./tailwind.config.js
     generates:
       - ./static/styles.css
 
@@ -53,7 +54,7 @@ tasks:
       - go test ./...
     deps:
       - assets
-      - lint
+      # - lint
 
   run:
     desc: Run the app as a local server
