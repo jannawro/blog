@@ -63,13 +63,13 @@ func (h *Handler) ServeBlog() http.HandlerFunc {
 		ctx := r.Context()
 
 		sortOption := getSortOption(r)
-		tag := r.URL.Query().Get("tag")
+		tags := r.URL.Query()["tag"]
 
 		var articles a.Articles
 		var err error
 
-		if tag != "" {
-			articles, err = h.service.GetByTags(ctx, []string{tag}, &sortOption)
+		if len(tags) > 0 {
+			articles, err = h.service.GetByTags(ctx, tags, &sortOption)
 		} else {
 			articles, err = h.service.GetAll(ctx, &sortOption)
 		}
