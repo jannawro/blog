@@ -54,7 +54,7 @@ func parseArguments() {
 
 func initMockRepository() *repository.MockRepository {
 	mockRepo := repository.NewMockRepository()
-	
+
 	sampleArticles := []article.Article{
 		{
 			ID:              1,
