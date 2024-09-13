@@ -7,15 +7,15 @@ import (
 	"github.com/jannawro/blog/components"
 )
 
-type HTMLHandler struct {
+type Handler struct {
 	service *article.Service
 }
 
-func NewHTMLHandler(service *article.Service) *HTMLHandler {
-	return &HTMLHandler{service: service}
+func NewHandler(service *article.Service) *Handler {
+	return &Handler{service: service}
 }
 
-func (h *HTMLHandler) ServeBlog() http.HandlerFunc {
+func (h *Handler) ServeBlog() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
