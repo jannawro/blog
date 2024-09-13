@@ -5,15 +5,15 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/jannawro/blog/article"
+	a "github.com/jannawro/blog/article"
 	"github.com/jannawro/blog/components"
 )
 
 type Handler struct {
-	service *article.Service
+	service *a.Service
 }
 
-func NewHandler(service *article.Service) *Handler {
+func NewHandler(service *a.Service) *Handler {
 	return &Handler{service: service}
 }
 
@@ -38,7 +38,7 @@ func (h *Handler) ServeArticle() http.HandlerFunc {
 		// Fetch article by title
 		article, err := h.service.GetByTitle(ctx, decodedTitle)
 		if err != nil {
-			if errors.Is(err, article.ErrArticleNotFound) {
+			if errors.Is(err, a.ErrArticleNotFound) {
 				http.Error(w, "Article not found", http.StatusNotFound)
 			} else {
 				http.Error(w, "Failed to fetch article", http.StatusInternalServerError)
@@ -65,7 +65,7 @@ func (h *Handler) ServeBlog() http.HandlerFunc {
 		sortOption := getSortOption(r)
 		tag := r.URL.Query().Get("tag")
 
-		var articles article.Articles
+		var articles a.Articles
 		var err error
 
 		if tag != "" {
@@ -89,16 +89,16 @@ func (h *Handler) ServeBlog() http.HandlerFunc {
 	}
 }
 
-func getSortOption(r *http.Request) article.SortOption {
+func getSortOption(r *http.Request) a.SortOption {
 	sortParam := r.URL.Query().Get("sort")
 	switch sortParam {
 	case "title":
-		return article.SortByTitle
+		return a.SortByTitle
 	case "id":
-		return article.SortByID
+		return a.SortByID
 	case "date":
 		fallthrough
 	default:
-		return article.SortByPublicationDate
+		return a.SortByPublicationDate
 	}
 }
