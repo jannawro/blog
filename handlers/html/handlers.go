@@ -20,7 +20,17 @@ func (h *Handler) ServeBlog() http.HandlerFunc {
 		ctx := r.Context()
 
 		sortOption := getSortOption(r)
-		articles, err := h.service.GetAll(ctx, &sortOption)
+		tag := r.URL.Query().Get("tag")
+
+		var articles article.Articles
+		var err error
+
+		if tag != "" {
+			articles, err = h.service.GetByTags(ctx, []string{tag}, &sortOption)
+		} else {
+			articles, err = h.service.GetAll(ctx, &sortOption)
+		}
+
 		if err != nil {
 			http.Error(w, "Failed to fetch articles", http.StatusInternalServerError)
 			return
