@@ -33,7 +33,14 @@ templ ArticleCard(a article.Article) {
 }
 
 func truncateHTML(input []byte, maxLength int) template.HTML {
-html := string(input)
-if len(html) <= maxLength { return template.HTML(html) } truncated :=html[:maxLength] lastSpaceIndex
-	:=strings.LastIndex(truncated, " " ) if lastSpaceIndex !=-1 { truncated=truncated[:lastSpaceIndex] } return
-	template.HTML(truncated + "..." ) }
+	html := string(input)
+	if len(html) <= maxLength {
+		return template.HTML(html)
+	}
+	truncated := html[:maxLength]
+	lastSpaceIndex := strings.LastIndex(truncated, " ")
+	if lastSpaceIndex != -1 {
+		truncated = truncated[:lastSpaceIndex]
+	}
+	return template.HTML(truncated + "...")
+}
