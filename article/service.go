@@ -2,8 +2,12 @@ package article
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"fmt"
 )
+
+var ErrArticleNotFound = errors.New("article not found")
 
 type Service struct {
 	repo ArticleRepository
@@ -33,7 +37,14 @@ func (s *Service) GetAll(ctx context.Context, sortBy *SortOption) (Articles, err
 }
 
 func (s *Service) GetByTitle(ctx context.Context, title string) (*Article, error) {
-	return s.repo.GetByTitle(ctx, title)
+	article, err := s.repo.GetByTitle(ctx, title)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("%w: %v", ErrArticleNotFound, err)
+		}
+		return nil, err
+	}
+	return article, nil
 }
 
 func (s *Service) GetByTags(
