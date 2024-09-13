@@ -1,48 +1,39 @@
 package components
 
 import (
-	"fmt"
-	"html/template"
-	"strings"
+"fmt"
+"html/template"
+"strings"
 
-	"github.com/gomarkdown/markdown"
-	"github.com/gomarkdown/markdown/parser"
-	"github.com/jannawro/blog/article"
+"github.com/gomarkdown/markdown"
+"github.com/gomarkdown/markdown/parser"
+"github.com/jannawro/blog/article"
 )
 
 templ ArticleCard(a article.Article) {
-	<div class="border-4 border-[#1a1a1a] mb-8 p-4 bg-[#f5f5f5] shadow-lg hover:shadow-xl transition-shadow duration-300">
-		<h2 class="text-4xl font-bold mb-4 uppercase text-[#1a1a1a]">{ a.Title }</h2>
-		<div class="mb-4 text-lg text-[#1a1a1a] prose">
-			@templ.Raw(truncateHTML(markdown.ToHTML([]byte(a.Content), parser.NewWithExtensions(parser.CommonExtensions),
-				nil), 150))
-		</div>
-		<div class="mb-4">
-			<span class="text-lg font-bold mr-4 text-[#1a1a1a]">{ a.PublicationDate.Format("2006-01-02") }</span>
-			<div class="flex flex-wrap">
-				for _, tag := range a.Tags {
-					@Tag(tag)
-				}
-			</div>
-		</div>
-		<a
-			href={ templ.SafeURL(fmt.Sprintf("/article/%d", a.ID)) }
-			class="inline-block bg-[#1a1a1a] text-[#f5f5f5] font-bold py-2 px-4 hover:bg-[#FF0000] hover:text-[#f5f5f5] border-2 border-[#1a1a1a] hover:border-[#FF0000] transition-colors duration-200"
-		>
-			READ MORE
-		</a>
+<div class="border-4 border-[#1a1a1a] mb-8 p-4 bg-[#f5f5f5] shadow-lg hover:shadow-xl transition-shadow duration-300">
+	<h2 class="text-4xl font-bold mb-4 uppercase text-[#1a1a1a]">{ a.Title }</h2>
+	<div class="mb-4 text-lg text-[#1a1a1a] prose">
+		@templ.Raw(truncateHTML(markdown.ToHTML([]byte(a.Content), parser.NewWithExtensions(parser.CommonExtensions),
+		nil), 150))
 	</div>
+	<div class="mb-4">
+		<span class="text-lg font-bold mr-4 text-[#1a1a1a]">{ a.PublicationDate.Format("2006-01-02") }</span>
+		<div class="flex flex-wrap">
+			for _, tag := range a.Tags {
+			@Tag(tag)
+			}
+		</div>
+	</div>
+	<a href={ templ.SafeURL(fmt.Sprintf("/article/%d", a.URLHappyTitle())) }
+		class="inline-block bg-[#1a1a1a] text-[#f5f5f5] font-bold py-2 px-4 hover:bg-[#FF0000] hover:text-[#f5f5f5] border-2 border-[#1a1a1a] hover:border-[#FF0000] transition-colors duration-200">
+		READ MORE
+	</a>
+</div>
 }
 
 func truncateHTML(input []byte, maxLength int) template.HTML {
-	html := string(input)
-	if len(html) <= maxLength {
-		return template.HTML(html)
-	}
-	truncated := html[:maxLength]
-	lastSpaceIndex := strings.LastIndex(truncated, " ")
-	if lastSpaceIndex != -1 {
-		truncated = truncated[:lastSpaceIndex]
-	}
-	return template.HTML(truncated + "...")
-}
+html := string(input)
+if len(html) <= maxLength { return template.HTML(html) } truncated :=html[:maxLength] lastSpaceIndex
+	:=strings.LastIndex(truncated, " " ) if lastSpaceIndex !=-1 { truncated=truncated[:lastSpaceIndex] } return
+	template.HTML(truncated + "..." ) }
