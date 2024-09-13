@@ -137,6 +137,44 @@ func TestGetByTitle(t *testing.T) {
 	}
 }
 
+func TestGetByID(t *testing.T) {
+	service, mockRepo := setupTestService()
+	ctx := context.Background()
+
+	testArticle := article1.Article{
+		ID:              1,
+		Title:           "Test Article",
+		Content:         "This is a test article",
+		Tags:            []string{"test", "article"},
+		PublicationDate: time.Date(2023, 5, 10, 0, 0, 0, 0, time.UTC),
+	}
+	mockRepo.SetArticles([]article1.Article{testArticle})
+
+	tests := []struct {
+		name          string
+		id            int64
+		expectedFound bool
+	}{
+		{"Existing article", 1, true},
+		{"Non-existing article", 2, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			article, err := service.GetByID(ctx, tt.id)
+
+			if tt.expectedFound {
+				assert.NoError(t, err)
+				require.NotNil(t, article)
+				assert.Equal(t, tt.id, article.ID)
+			} else {
+				assert.Error(t, err)
+				assert.Nil(t, article)
+			}
+		})
+	}
+}
+
 func TestGetByTags(t *testing.T) {
 	service, mockRepo := setupTestService()
 	ctx := context.Background()

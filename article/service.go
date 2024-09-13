@@ -47,6 +47,17 @@ func (s *Service) GetByTitle(ctx context.Context, title string) (*Article, error
 	return article, nil
 }
 
+func (s *Service) GetByID(ctx context.Context, id int64) (*Article, error) {
+	article, err := s.repo.GetByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("%w: %v", ErrArticleNotFound, err)
+		}
+		return nil, err
+	}
+	return article, nil
+}
+
 func (s *Service) GetByTags(
 	ctx context.Context,
 	tags []string,
