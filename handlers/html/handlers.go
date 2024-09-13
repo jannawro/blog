@@ -1,7 +1,9 @@
 package html
 
 import (
+	"errors"
 	"net/http"
+	"net/url"
 
 	"github.com/jannawro/blog/article"
 	"github.com/jannawro/blog/components"
@@ -13,6 +15,47 @@ type Handler struct {
 
 func NewHandler(service *article.Service) *Handler {
 	return &Handler{service: service}
+}
+
+func (h *Handler) ServeArticle() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		// Extract title from URL path parameter
+		title := r.PathValue("title")
+		if title == "" {
+			http.Error(w, "Article title is required", http.StatusBadRequest)
+			return
+		}
+
+		// URL-decode the title if it contains special characters
+		decodedTitle, err := url.QueryUnescape(title)
+		if err != nil {
+			http.Error(w, "Invalid article title", http.StatusBadRequest)
+			return
+		}
+
+		// Fetch article by title
+		article, err := h.service.GetByTitle(ctx, decodedTitle)
+		if err != nil {
+			if errors.Is(err, article.ErrArticleNotFound) {
+				http.Error(w, "Article not found", http.StatusNotFound)
+			} else {
+				http.Error(w, "Failed to fetch article", http.StatusInternalServerError)
+			}
+			return
+		}
+
+		// Generate HTML using ArticlePage component
+		articlePage := components.ArticlePage(*article)
+
+		// Render the HTML
+		err = articlePage.Render(ctx, w)
+		if err != nil {
+			http.Error(w, "Failed to render article page", http.StatusInternalServerError)
+			return
+		}
+	}
 }
 
 func (h *Handler) ServeBlog() http.HandlerFunc {
