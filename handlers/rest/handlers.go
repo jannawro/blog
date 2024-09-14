@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
 	"github.com/jannawro/blog/article"
 )
 
@@ -53,7 +52,7 @@ func (h *Handler) GetAllArticles(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetArticleByTitle(w http.ResponseWriter, r *http.Request) {
-	title := mux.Vars(r)["title"]
+	title := r.PathValue("title")
 	article, err := h.service.GetByTitle(r.Context(), title)
 	if err != nil {
 		if err == article.ErrArticleNotFound {
@@ -68,7 +67,7 @@ func (h *Handler) GetArticleByTitle(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) GetArticleByID(w http.ResponseWriter, r *http.Request) {
-	idStr := mux.Vars(r)["id"]
+	idStr := r.PathValue("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
 		http.Error(w, "Invalid ID", http.StatusBadRequest)
@@ -107,7 +106,7 @@ func (h *Handler) GetArticlesByTags(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) UpdateArticleByTitle(w http.ResponseWriter, r *http.Request) {
-	title := mux.Vars(r)["title"]
+	title := r.PathValue("title")
 	var updatedData []byte
 	if err := json.NewDecoder(r.Body).Decode(&updatedData); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -128,7 +127,7 @@ func (h *Handler) UpdateArticleByTitle(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) DeleteArticleByTitle(w http.ResponseWriter, r *http.Request) {
-	title := mux.Vars(r)["title"]
+	title := r.PathValue("title")
 	err := h.service.DeleteByTitle(r.Context(), title)
 	if err != nil {
 		if err == article.ErrArticleNotFound {
