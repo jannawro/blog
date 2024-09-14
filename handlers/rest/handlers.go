@@ -1,7 +1,7 @@
 package rest
 
 import (
-	"github.com/jasonblanchard/di-notebook/article"
+	"github.com/jannawro/blog/article"
 )
 
 type Handler struct {
