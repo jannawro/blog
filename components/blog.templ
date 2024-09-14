@@ -5,6 +5,16 @@ import "github.com/jannawro/blog/article"
 templ Blog(articles []article.Article) {
 	@Page("A red door") {
 		<div class="container mx-auto px-4">
+			<div class="md:hidden mb-12">
+				<h1 class="text-6xl font-bold uppercase text-[#1a1a1a] flex items-center">
+					<span class="mr-2">A</span> <img src="/static/red_door_cropped.png" alt="Red Door" class="inline-block max-h-12 w-auto aspect-ratio-[241/439]"/>
+					<span class="text-[#FF0000]">RED</span> <span class="ml-2">DOOR</span>
+				</h1>
+				<p class="text-xl text-[#1a1a1a] mt-4">
+					A <span class="text-[#FF0000]">red</span> door is the threshold
+					between the real and the imaginary. The perfect place to put what I think and do. So I do.
+				</p>
+			</div>
 			<div class="flex flex-wrap -mx-4">
 				<div class="w-full md:w-1/2 px-4">
 					<div class="hidden md:block mb-12">
