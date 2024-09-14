@@ -14,7 +14,8 @@ import (
 )
 
 var (
-	port string
+	port   string
+	apiKey string
 )
 
 func main() {
@@ -49,6 +50,7 @@ func main() {
 
 func parseArguments() {
 	flag.StringVar(&port, "port", "8888", "The port the server should listen on. The default is 8888.")
+	flag.StringVar(&apiKey, "api-key", "", "API Key for the /api endpoints.")
 	flag.Parse()
 }
 
