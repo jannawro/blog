@@ -7,37 +7,36 @@ import (
 
 templ TagIndexPage(taggedArticles map[string][]article.Article) {
 	@Page("Index") {
-		<div class="min-h-screen bg-[#f5f5f5] text-[#1a1a1a]">
-			<header class="bg-[#1a1a1a] text-[#f5f5f5] border-b-8 border-[#f5f5f5]">
-				<div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-					<h1 class="text-5xl font-bold uppercase">
-						A <span class="text-[#FF0000]">RED</span> DOOR <span class="text-[#FF0000]">| </span><i>INDEX</i>
+		<div class="min-h-screen bg-gradient-to-bl from-white to-gray-300 flex flex-col items-center">
+			<div class="w-full max-w-4xl bg-white border-4 border-[#1a1a1a] flex flex-col my-8">
+				<div class="w-full flex justify-center p-8 pb-0">
+					<img src="/static/red_door_nobg.png" alt="Red Door" class="w-32 h-auto object-contain"/>
+				</div>
+				<div class="flex-grow flex flex-col p-8">
+					<h1 class="text-6xl font-bold mb-6 uppercase text-[#1a1a1a] border-b-4 border-[#1a1a1a] pb-4">
+						A <span class="text-[#FF0000]">RED</span> DOOR | INDEX
 					</h1>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+						for tag, articles := range taggedArticles {
+							<div class="mb-8">
+								<h2 class="text-3xl font-bold mb-4 uppercase text-[#1a1a1a]">{ tag }</h2>
+								<ul class="space-y-2">
+									for _, article := range articles {
+										<li>
+											<a
+												href={ templ.SafeURL(fmt.Sprintf("/article/%d", article.ID)) }
+												class="text-lg font-bold text-[#1a1a1a] hover:text-[#FF0000] hover:underline transition-colors duration-200"
+											>
+												{ article.Title }
+											</a>
+										</li>
+									}
+								</ul>
+							</div>
+						}
+					</div>
 				</div>
-			</header>
-			<main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-					for tag, articles := range taggedArticles {
-						<div
-							class="border-4 border-[#1a1a1a] bg-[#f5f5f5] p-6 shadow-lg hover:shadow-xl transition-shadow duration-300"
-						>
-							<h2 class="text-3xl font-bold mb-6 uppercase">{ tag }</h2>
-							<ul class="space-y-4">
-								for _, article := range articles {
-									<li>
-										<a
-											href={ templ.SafeURL(fmt.Sprintf("/article/%d", article.ID)) }
-											class="text-lg font-bold text-[#1a1a1a] hover:text-[#FF0000] hover:underline transition-colors duration-200"
-										>
-											{ article.Title }
-										</a>
-									</li>
-								}
-							</ul>
-						</div>
-					}
-				</div>
-			</main>
+			</div>
 		</div>
 	}
 }
