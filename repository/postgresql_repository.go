@@ -7,6 +7,9 @@ import (
 	"os"
 
 	"github.com/jannawro/blog/article"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
 )
 
@@ -26,10 +29,43 @@ func NewPostgresqlRepository(connString string) (*PostgresqlRepository, error) {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
+	// Run migration
+	if err := runMigration(db); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("failed to run migration: %w", err)
+	}
+
 	return &PostgresqlRepository{
 		db: db,
 		q:  New(db),
 	}, nil
+}
+
+func runMigration(db *sql.DB) error {
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		return fmt.Errorf("failed to create database driver: %w", err)
+	}
+
+	// Create a file source for the migration
+	fileSource, err := (&file.File{}).Open("file://repository/sqlc/migrations")
+	if err != nil {
+		return fmt.Errorf("failed to create file source: %w", err)
+	}
+
+	m, err := migrate.NewWithInstance(
+		"file", fileSource,
+		"postgres", driver)
+	if err != nil {
+		return fmt.Errorf("failed to create migrate instance: %w", err)
+	}
+
+	// Run the migration
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		return fmt.Errorf("failed to run migration: %w", err)
+	}
+
+	return nil
 }
 
 func (r *PostgresqlRepository) Create(ctx context.Context, article article.Article) (*article.Article, error) {
