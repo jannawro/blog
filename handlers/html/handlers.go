@@ -47,7 +47,7 @@ func (h *Handler) ServeArticle() http.Handler {
 			http.Error(w, "Failed to render article page", http.StatusInternalServerError)
 			return
 		}
-	}
+	})
 }
 
 func (h *Handler) ServeBlog() http.Handler {
@@ -78,7 +78,7 @@ func (h *Handler) ServeBlog() http.Handler {
 			http.Error(w, "Failed to render blog", http.StatusInternalServerError)
 			return
 		}
-	}
+	})
 }
 
 func (h *Handler) ServeIndex() http.Handler {
@@ -112,7 +112,7 @@ func (h *Handler) ServeIndex() http.Handler {
 			http.Error(w, "Failed to render index page", http.StatusInternalServerError)
 			return
 		}
-	}
+	})
 }
 
 func getSortOption(r *http.Request) a.SortOption {
