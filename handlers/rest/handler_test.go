@@ -94,10 +94,11 @@ func TestGetArticleByTitle(t *testing.T) {
 	mockRepo.SetArticles([]article.Article{expectedArticle})
 
 	req := httptest.NewRequest("GET", "/articles/test-article", nil)
-	req.SetPathValue("title", "test-article")
+	pathParam := "title"
+	req.SetPathValue(pathParam, "test-article")
 
 	rr := httptest.NewRecorder()
-	handler.GetArticleByTitle().ServeHTTP(rr, req)
+	handler.GetArticleByTitle(pathParam).ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -115,10 +116,11 @@ func TestGetArticleByID(t *testing.T) {
 	mockRepo.SetArticles([]article.Article{expectedArticle})
 
 	req := httptest.NewRequest("GET", "/articles/1", nil)
-	req.SetPathValue("id", "1")
+	pathParam := "id"
+	req.SetPathValue(pathParam, "1")
 
 	rr := httptest.NewRecorder()
-	handler.GetArticleByID().ServeHTTP(rr, req)
+	handler.GetArticleByID(pathParam).ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -164,11 +166,12 @@ func TestUpdateArticleByTitle(t *testing.T) {
 	}`)
 
 	req := httptest.NewRequest("PUT", "/articles/original-title", bytes.NewBuffer(updatedData))
-	req.SetPathValue("title", "original-title")
+	pathParam := "title"
+	req.SetPathValue(pathParam, "original-title")
 	req.Header.Set("Content-Type", "application/json")
 
 	rr := httptest.NewRecorder()
-	handler.UpdateArticleByTitle().ServeHTTP(rr, req)
+	handler.UpdateArticleByTitle(pathParam).ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusOK, rr.Code)
 
@@ -187,10 +190,11 @@ func TestDeleteArticleByTitle(t *testing.T) {
 	mockRepo.SetArticles([]article.Article{articleToDelete})
 
 	req := httptest.NewRequest("DELETE", "/articles/article-to-delete", nil)
-	req.SetPathValue("title", "article-to-delete")
+	pathParam := "title"
+	req.SetPathValue(pathParam, "article-to-delete")
 
 	rr := httptest.NewRecorder()
-	handler.DeleteArticleByTitle().ServeHTTP(rr, req)
+	handler.DeleteArticleByTitle(pathParam).ServeHTTP(rr, req)
 
 	assert.Equal(t, http.StatusNoContent, rr.Code)
 
