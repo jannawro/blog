@@ -108,4 +108,118 @@ func TestGetArticleByTitle(t *testing.T) {
 	assert.Equal(t, expectedArticle.Slug, response.Slug)
 }
 
-// Add more tests for other handler methods...
+func TestGetArticleByID(t *testing.T) {
+	handler, mockRepo := setupTest()
+
+	expectedArticle := article.Article{ID: 1, Title: "Test Article", Slug: "test-article"}
+	mockRepo.SetArticles([]article.Article{expectedArticle})
+
+	req := httptest.NewRequest("GET", "/articles/1", nil)
+	req.SetPathValue("id", "1")
+
+	rr := httptest.NewRecorder()
+	handler.GetArticleByID().ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	var response article.Article
+	err := json.NewDecoder(rr.Body).Decode(&response)
+	assert.NoError(t, err)
+	assert.Equal(t, expectedArticle.ID, response.ID)
+	assert.Equal(t, expectedArticle.Title, response.Title)
+}
+
+func TestGetArticlesByTags(t *testing.T) {
+	handler, mockRepo := setupTest()
+
+	articles := []article.Article{
+		{ID: 1, Title: "Article 1", Tags: []string{"tag1", "tag2"}},
+		{ID: 2, Title: "Article 2", Tags: []string{"tag2", "tag3"}},
+		{ID: 3, Title: "Article 3", Tags: []string{"tag1", "tag3"}},
+	}
+	mockRepo.SetArticles(articles)
+
+	req := httptest.NewRequest("GET", "/articles?tag=tag1&tag=tag2", nil)
+
+	rr := httptest.NewRecorder()
+	handler.GetArticlesByTags().ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	var response article.Articles
+	err := json.NewDecoder(rr.Body).Decode(&response)
+	assert.NoError(t, err)
+	assert.Len(t, response, 1)
+	assert.Equal(t, "Article 1", response[0].Title)
+}
+
+func TestUpdateArticleByTitle(t *testing.T) {
+	handler, mockRepo := setupTest()
+
+	originalArticle := article.Article{ID: 1, Title: "Original Title", Slug: "original-title", Content: "Original content"}
+	mockRepo.SetArticles([]article.Article{originalArticle})
+
+	updatedData := []byte(`{
+		"article": "title:Updated Title\npublicationDate:2023-05-16\ntags:updated,article\n===\nThis is updated content."
+	}`)
+
+	req := httptest.NewRequest("PUT", "/articles/original-title", bytes.NewBuffer(updatedData))
+	req.SetPathValue("title", "original-title")
+	req.Header.Set("Content-Type", "application/json")
+
+	rr := httptest.NewRecorder()
+	handler.UpdateArticleByTitle().ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	var response article.Article
+	err := json.NewDecoder(rr.Body).Decode(&response)
+	assert.NoError(t, err)
+	assert.Equal(t, int64(1), response.ID)
+	assert.Equal(t, "Updated Title", response.Title)
+	assert.Equal(t, "This is updated content.", response.Content)
+}
+
+func TestDeleteArticleByTitle(t *testing.T) {
+	handler, mockRepo := setupTest()
+
+	articleToDelete := article.Article{ID: 1, Title: "Article to Delete", Slug: "article-to-delete"}
+	mockRepo.SetArticles([]article.Article{articleToDelete})
+
+	req := httptest.NewRequest("DELETE", "/articles/article-to-delete", nil)
+	req.SetPathValue("title", "article-to-delete")
+
+	rr := httptest.NewRecorder()
+	handler.DeleteArticleByTitle().ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusNoContent, rr.Code)
+
+	// Verify the article was deleted
+	articles, err := mockRepo.GetAll(req.Context())
+	assert.NoError(t, err)
+	assert.Len(t, articles, 0)
+}
+
+func TestGetAllTags(t *testing.T) {
+	handler, mockRepo := setupTest()
+
+	articles := []article.Article{
+		{ID: 1, Title: "Article 1", Tags: []string{"tag1", "tag2"}},
+		{ID: 2, Title: "Article 2", Tags: []string{"tag2", "tag3"}},
+		{ID: 3, Title: "Article 3", Tags: []string{"tag1", "tag3"}},
+	}
+	mockRepo.SetArticles(articles)
+
+	req := httptest.NewRequest("GET", "/tags", nil)
+
+	rr := httptest.NewRecorder()
+	handler.GetAllTags().ServeHTTP(rr, req)
+
+	assert.Equal(t, http.StatusOK, rr.Code)
+
+	var response []string
+	err := json.NewDecoder(rr.Body).Decode(&response)
+	assert.NoError(t, err)
+	assert.Len(t, response, 3)
+	assert.ElementsMatch(t, []string{"tag1", "tag2", "tag3"}, response)
+}
