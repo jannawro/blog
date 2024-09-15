@@ -25,7 +25,7 @@ go.work
 
 # js
 node_modules*
-static/*.css
+handlers/assets/*.css
 
 # templ
 *_templ.go

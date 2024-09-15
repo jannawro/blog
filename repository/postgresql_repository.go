@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"embed"
 	"fmt"
 	"os"
 
@@ -10,9 +11,11 @@ import (
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/jannawro/blog/article"
-	"github.com/jannawro/blog/repository/migrations"
 	_ "github.com/lib/pq"
 )
+
+//go:embed sqlc/migrations/*
+var migrationsFiles embed.FS
 
 type PostgresqlRepository struct {
 	db *sql.DB
@@ -49,7 +52,7 @@ func runMigration(db *sql.DB) error {
 	}
 
 	// Create an embed source for the migration
-	embedSource, err := iofs.New(migrations.MigrationsFS, ".")
+	embedSource, err := iofs.New(migrationsFiles, ".")
 	if err != nil {
 		return fmt.Errorf("failed to create embed source: %w", err)
 	}
