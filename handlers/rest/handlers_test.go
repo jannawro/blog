@@ -26,15 +26,14 @@ func TestCreateArticle(t *testing.T) {
 
 	articleData := []byte(`{"title":"Test Article","content":"This is a test article.","tags":["test"]}`)
 	expectedArticle := &article.Article{
-		ID:              1,
-		Title:           "Test Article",
-		Content:         "This is a test article.",
-		Tags:            []string{"test"},
-		PublicationDate: time.Now(),
+		Title:   "Test Article",
+		Content: "This is a test article.",
+		Tags:    []string{"test"},
 	}
 
 	req, err := http.NewRequest("POST", "/articles", bytes.NewBuffer(articleData))
 	assert.NoError(t, err)
+	req.Header.Set("Content-Type", "application/json")
 
 	rr := httptest.NewRecorder()
 	handler.CreateArticle().ServeHTTP(rr, req)
