@@ -49,7 +49,8 @@ func TestCreateArticle(t *testing.T) {
 	assert.Equal(t, expectedArticle.Tags, response.Tags)
 
 	// Verify the article was added to the mock repository
-	articles, _ := mockRepo.GetAll(req.Context())
+	articles, err := mockRepo.GetAll(req.Context())
+	assert.NoError(t, err)
 	assert.Len(t, articles, 1)
 	assert.Equal(t, expectedArticle.Title, articles[0].Title)
 }
