@@ -1,17 +1,17 @@
 package components
 
-templ Page(title string) {
+templ Page(title string, assetsPath string) {
 	<!DOCTYPE html>
 	<html lang="en" class="h-full">
 		<head>
 			<meta charset="UTF-8"/>
 			<title>{ title }</title>
-			<link rel="icon" type="image/png" href="/static/favicon.png"/>
+			<link rel="icon" type="image/png" href={assetsPath + "favicon.png"}/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
 			<meta name="robots" content="index, follow"/>
 			<meta name="revisit-after" content="7 days"/>
 			<meta name="language" content="English"/>
-			<link rel="stylesheet" href="/static/styles.css"/>
+			<link rel="stylesheet" href={assetsPath + "styles.css"}/>
 		</head>
 		<body
 			class="min-h-screen bg-gradient-to-bl from-white to-gray-300"
