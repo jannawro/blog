@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/jannawro/blog/article"
+	_ "github.com/lib/pq"
 )
 
 type PostgresqlRepository struct {
@@ -14,11 +15,21 @@ type PostgresqlRepository struct {
 	q  *Queries
 }
 
-func NewPostgresqlRepository(db *sql.DB) *PostgresqlRepository {
+func NewPostgresqlRepository(connString string) (*PostgresqlRepository, error) {
+	db, err := sql.Open("postgres", connString)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open database connection: %w", err)
+	}
+
+	if err := db.Ping(); err != nil {
+		db.Close()
+		return nil, fmt.Errorf("failed to ping database: %w", err)
+	}
+
 	return &PostgresqlRepository{
 		db: db,
 		q:  New(db),
-	}
+	}, nil
 }
 
 func (r *PostgresqlRepository) Create(ctx context.Context, article article.Article) (*article.Article, error) {
