@@ -15,8 +15,9 @@ import (
 )
 
 var (
-	port   string
-	apiKey string
+	port            string
+	apiKey          string
+	postgresConnStr string
 )
 
 func main() {
@@ -74,6 +75,7 @@ func main() {
 func parseArguments() {
 	flag.StringVar(&port, "port", "8888", "The port the server should listen on. The default is 8888.")
 	flag.StringVar(&apiKey, "api-key", "", "API Key for the /api endpoints.")
+	flag.StringVar(&postgresConnStr, "postgres-connection-string", "", "Connection string for a postgres database.")
 	flag.Parse()
 }
 
