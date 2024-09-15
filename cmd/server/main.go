@@ -31,18 +31,37 @@ func main() {
 	frontendRouter.Handle("GET /static/", static.Handler("/static/"))
 	frontendRouter.HandleFunc("GET /", htmlHandler.ServeBlog())
 	frontendRouter.HandleFunc("GET /index", htmlHandler.ServeIndex())
-	frontendRouter.HandleFunc("GET /article/{slug}", htmlHandler.ServeArticle())
-
-	apiRouter := http.NewServeMux()
-	apiRouter.Handle("GET /api/articles", restHandler.GetAllArticles)
-
+	frontendRouter.HandleFunc("GET /article/{title}", htmlHandler.ServeArticle())
 	frontendStack := middleware.CreateStack(
 		middleware.Logging,
 	)
 
+	apiRouter := http.NewServeMux()
+	apiRouter.Handle("POST /api/articles", restHandler.CreateArticle())
+	apiRouter.Handle("GET /api/articles", restHandler.GetAllArticles())
+	apiRouter.Handle("GET /api/articles/title/{title}", restHandler.GetArticleByTitle())
+	apiRouter.Handle("GET /api/articles/id/{id}", restHandler.GetArticleByID())
+	apiRouter.Handle("GET /api/articles/tags", restHandler.GetArticlesByTags())
+	apiRouter.Handle("PUT /api/articles/{title}", restHandler.UpdateArticleByTitle())
+	apiRouter.Handle("DELETE /api/articles/{title}", restHandler.DeleteArticleByTitle())
+	apiRouter.Handle("GET /api/tags", restHandler.GetAllTags())
+	apiStack := middleware.CreateStack(
+		middleware.Logging,
+		middleware.APIKeyAuth(middleware.APIKeyConfig{
+			KeyName: "X-API-Key",
+			Keys: map[string]bool{
+				apiKey: true,
+			},
+		}),
+	)
+
+	mainRouter := http.NewServeMux()
+	mainRouter.Handle("/", frontendStack(frontendRouter))
+	mainRouter.Handle("/api/", apiStack(apiRouter))
+
 	server := http.Server{
 		Addr:    ":" + port,
-		Handler: frontendStack(frontendRouter),
+		Handler: mainRouter,
 	}
 
 	log.Println("Listening on", port)

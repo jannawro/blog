@@ -21,14 +21,14 @@ func (h *Handler) ServeArticle() http.HandlerFunc {
 		ctx := r.Context()
 
 		// Extract title from URL path parameter
-		slug := r.PathValue("slug")
-		if slug == "" {
+		title := r.PathValue("title")
+		if title == "" {
 			http.Error(w, "Article title is required", http.StatusBadRequest)
 			return
 		}
 
 		// Fetch article by title
-		article, err := h.service.GetBySlug(ctx, slug)
+		article, err := h.service.GetBySlug(ctx, title)
 		if err != nil {
 			if errors.Is(err, a.ErrArticleNotFound) {
 				http.Error(w, "Article not found", http.StatusNotFound)

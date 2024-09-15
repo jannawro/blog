@@ -5,6 +5,7 @@ vars:
   TAG:
     sh: git rev-parse HEAD
   PORT: 8888
+  API_KEY: "anapikey"
   TEMPL_VERSION: v0.2.778
   SQLC_VERSION: v1.27.0
   GOLANGCILINT_VERSION: v1.60.3
@@ -63,7 +64,7 @@ tasks:
       - generate
       - test
     cmds:
-      - go run ./cmd/server/... --port {{.PORT}}
+      - go run ./cmd/server/... --port {{.PORT}} --api-key {{.API_KEY}}
 
   docker-build:
     desc: Build the blogserver container using docker
