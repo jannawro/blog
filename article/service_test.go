@@ -8,13 +8,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	article1 "github.com/jannawro/blog/article"
+	a "github.com/jannawro/blog/article"
 	"github.com/jannawro/blog/repository"
 )
 
-func setupTestService() (*article1.Service, *repository.MockRepository) {
+func setupTestService() (*a.Service, *repository.MockRepository) {
 	mockRepo := repository.NewMockRepository()
-	articleService := article1.NewService(mockRepo)
+	articleService := a.NewService(mockRepo)
 	return articleService, mockRepo
 }
 
@@ -54,7 +54,8 @@ This is the content of the test article.`),
 				assert.NoError(t, err)
 				require.NotNil(t, article)
 				assert.NotEmpty(t, article.ID)
-				assert.Equal(t, "test-article", article.Title)
+				assert.Equal(t, "Test Article", article.Title)
+				assert.Equal(t, "test-article", article.Slug)
 				assert.Equal(t, []string{"test", "article"}, article.Tags)
 				expectedDate, _ := time.Parse("2006-01-02", "2023-05-10")
 				assert.Equal(t, expectedDate, article.PublicationDate)
@@ -68,10 +69,10 @@ func TestGetAllTags(t *testing.T) {
 	service, mockRepo := setupTestService()
 	ctx := context.Background()
 
-	testArticles := []article1.Article{
-		{ID: 1, Title: "Article 1", Tags: []string{"tag1", "tag2"}},
-		{ID: 2, Title: "Article 2", Tags: []string{"tag2", "tag3"}},
-		{ID: 3, Title: "Article 3", Tags: []string{"tag1", "tag3", "tag4"}},
+	testArticles := []a.Article{
+		{ID: 1, Title: "Article 1", Slug: "article-1", Tags: []string{"tag1", "tag2"}},
+		{ID: 2, Title: "Article 2", Slug: "article-2", Tags: []string{"tag2", "tag3"}},
+		{ID: 3, Title: "Article 3", Slug: "article-3", Tags: []string{"tag1", "tag3", "tag4"}},
 	}
 	mockRepo.SetArticles(testArticles)
 
@@ -85,9 +86,9 @@ func TestGetAll(t *testing.T) {
 	service, mockRepo := setupTestService()
 	ctx := context.Background()
 
-	testArticles := []article1.Article{
-		{ID: 1, Title: "Article 1", Content: "Content 1", Tags: []string{"tag1", "tag2"}},
-		{ID: 2, Title: "Article 2", Content: "Content 2", Tags: []string{"tag2", "tag3"}},
+	testArticles := []a.Article{
+		{ID: 1, Title: "Article 1", Slug: "article-1", Content: "Content 1", Tags: []string{"tag1", "tag2"}},
+		{ID: 2, Title: "Article 2", Slug: "article-2", Content: "Content 2", Tags: []string{"tag2", "tag3"}},
 	}
 	mockRepo.SetArticles(testArticles)
 
@@ -103,18 +104,18 @@ func TestGetByTitle(t *testing.T) {
 	service, mockRepo := setupTestService()
 	ctx := context.Background()
 
-	testArticle := article1.Article{
+	testArticle := a.Article{
 		ID:              1,
-		Title:           "test-article",
+		Slug:            "test-article",
 		Content:         "This is a test article",
 		Tags:            []string{"test", "article"},
 		PublicationDate: time.Date(2023, 5, 10, 0, 0, 0, 0, time.UTC),
 	}
-	mockRepo.SetArticles([]article1.Article{testArticle})
+	mockRepo.SetArticles([]a.Article{testArticle})
 
 	tests := []struct {
 		name          string
-		title         string
+		slug          string
 		expectedFound bool
 	}{
 		{"Existing article", "test-article", true},
@@ -123,12 +124,12 @@ func TestGetByTitle(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			article, err := service.GetByTitle(ctx, tt.title)
+			article, err := service.GetBySlug(ctx, tt.slug)
 
 			if tt.expectedFound {
 				assert.NoError(t, err)
 				require.NotNil(t, article)
-				assert.Equal(t, tt.title, article.Title)
+				assert.Equal(t, tt.slug, article.Slug)
 			} else {
 				assert.Error(t, err)
 				assert.Nil(t, article)
@@ -141,14 +142,14 @@ func TestGetByID(t *testing.T) {
 	service, mockRepo := setupTestService()
 	ctx := context.Background()
 
-	testArticle := article1.Article{
+	testArticle := a.Article{
 		ID:              1,
-		Title:           "Test Article",
+		Slug:            "test-article",
 		Content:         "This is a test article",
 		Tags:            []string{"test", "article"},
 		PublicationDate: time.Date(2023, 5, 10, 0, 0, 0, 0, time.UTC),
 	}
-	mockRepo.SetArticles([]article1.Article{testArticle})
+	mockRepo.SetArticles([]a.Article{testArticle})
 
 	tests := []struct {
 		name          string
@@ -179,7 +180,7 @@ func TestGetByTags(t *testing.T) {
 	service, mockRepo := setupTestService()
 	ctx := context.Background()
 
-	testArticles := []article1.Article{
+	testArticles := []a.Article{
 		{ID: 1, Title: "Article 1", Content: "Content 1", Tags: []string{"tag1", "tag2"}},
 		{ID: 2, Title: "Article 2", Content: "Content 2", Tags: []string{"tag2", "tag3"}},
 		{ID: 3, Title: "Article 3", Content: "Content 3", Tags: []string{"tag3", "tag4"}},
@@ -217,23 +218,23 @@ func TestUpdateByTitle(t *testing.T) {
 	service, mockRepo := setupTestService()
 	ctx := context.Background()
 
-	initialArticle := article1.Article{
+	initialArticle := a.Article{
 		ID:      1,
-		Title:   "Initial Article",
+		Slug:    "initial-article",
 		Content: "Initial content",
 		Tags:    []string{"initial", "tag"},
 	}
-	mockRepo.SetArticles([]article1.Article{initialArticle})
+	mockRepo.SetArticles([]a.Article{initialArticle})
 
 	tests := []struct {
 		name        string
-		title       string
+		slug        string
 		updatedData []byte
 		expectedErr bool
 	}{
 		{
-			name:  "Update existing article",
-			title: "Initial Article",
+			name: "Update existing article",
+			slug: "initial-article",
 			updatedData: []byte(`title:Updated Article
 publicationDate:2023-05-10
 tags:updated,tag
@@ -243,7 +244,7 @@ Updated content`),
 		},
 		{
 			name:        "Update non-existing article",
-			title:       "Non-existing Article",
+			slug:        "non-existing-article",
 			updatedData: []byte("Title: New Article\nTags: new, tag\nPublication Date: 2023-05-10\n\nNew content"),
 			expectedErr: true,
 		},
@@ -251,7 +252,7 @@ Updated content`),
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			updatedArticle, err := service.UpdateByTitle(ctx, tt.title, tt.updatedData)
+			updatedArticle, err := service.UpdateBySlug(ctx, tt.slug, tt.updatedData)
 
 			if tt.expectedErr {
 				assert.Error(t, err)
@@ -259,7 +260,8 @@ Updated content`),
 			} else {
 				assert.NoError(t, err)
 				require.NotNil(t, updatedArticle)
-				assert.Equal(t, "updated-article", updatedArticle.Title)
+				assert.Equal(t, "Updated Article", updatedArticle.Title)
+				assert.Equal(t, "updated-article", updatedArticle.Slug)
 				assert.Equal(t, []string{"updated", "tag"}, updatedArticle.Tags)
 				expectedDate, _ := time.Parse("2006-01-02", "2023-05-10")
 				assert.Equal(t, expectedDate, updatedArticle.PublicationDate)
@@ -273,31 +275,31 @@ func TestDeleteByTitle(t *testing.T) {
 	service, mockRepo := setupTestService()
 	ctx := context.Background()
 
-	initialArticle := article1.Article{
-		ID:    1,
-		Title: "Article to Delete",
+	initialArticle := a.Article{
+		ID:   1,
+		Slug: "article-to-delete",
 	}
-	mockRepo.SetArticles([]article1.Article{initialArticle})
+	mockRepo.SetArticles([]a.Article{initialArticle})
 
 	tests := []struct {
 		name        string
-		title       string
+		slug        string
 		expectedErr bool
 	}{
-		{"Delete existing article", "Article to Delete", false},
+		{"Delete existing article", "article-to-delete", false},
 		{"Delete non-existing article", "Non-existing Article", true},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := service.DeleteByTitle(ctx, tt.title)
+			err := service.DeleteBySlug(ctx, tt.slug)
 
 			if tt.expectedErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 				// Verify the article is actually deleted
-				_, err := service.GetByTitle(ctx, tt.title)
+				_, err := service.GetBySlug(ctx, tt.slug)
 				assert.Error(t, err)
 			}
 		})

@@ -30,7 +30,7 @@ func main() {
 	router.Handle("GET /static/", static.Handler("/static/"))
 	router.HandleFunc("GET /", htmlHandler.ServeBlog())
 	router.HandleFunc("GET /index", htmlHandler.ServeIndex())
-	router.HandleFunc("GET /article/{id}", htmlHandler.ServeArticle())
+	router.HandleFunc("GET /article/{slug}", htmlHandler.ServeArticle())
 
 	stack := middleware.CreateStack(
 		middleware.Logging,
@@ -61,6 +61,7 @@ func initMockRepository() *repository.MockRepository {
 		{
 			ID:              1,
 			Title:           "Getting Started with Go",
+			Slug:            "getting-started-with-go",
 			Content:         "Go is a statically typed, compiled programming language designed at Google...",
 			Tags:            []string{"go", "programming", "beginner"},
 			PublicationDate: time.Now().AddDate(0, 0, -7),
@@ -68,6 +69,7 @@ func initMockRepository() *repository.MockRepository {
 		{
 			ID:              2,
 			Title:           "Web Development with Go",
+			Slug:            "web-development-with-go",
 			Content:         "Go is an excellent choice for web development due to its simplicity and performance...",
 			Tags:            []string{"go", "web-development", "backend"},
 			PublicationDate: time.Now().AddDate(0, 0, -3),
@@ -75,6 +77,7 @@ func initMockRepository() *repository.MockRepository {
 		{
 			ID:              3,
 			Title:           "Concurrency in Go",
+			Slug:            "concurrency-in-go",
 			Content:         "One of Go's standout features is its built-in support for concurrency...",
 			Tags:            []string{"go", "concurrency", "advanced"},
 			PublicationDate: time.Now().AddDate(0, 0, -1),

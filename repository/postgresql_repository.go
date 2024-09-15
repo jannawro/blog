@@ -88,8 +88,8 @@ func (r *PostgresqlRepository) GetByID(ctx context.Context, id int64) (*article.
 	}, nil
 }
 
-func (r *PostgresqlRepository) GetByTitle(ctx context.Context, title string) (*article.Article, error) {
-	dbArticle, err := r.q.GetArticleByTitle(ctx, title)
+func (r *PostgresqlRepository) GetBySlug(ctx context.Context, slug string) (*article.Article, error) {
+	dbArticle, err := r.q.GetArticleBySlug(ctx, slug)
 	if err != nil {
 		return nil, err
 	}

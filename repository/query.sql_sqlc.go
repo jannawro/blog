@@ -13,13 +13,14 @@ import (
 )
 
 const createArticle = `-- name: CreateArticle :one
-INSERT INTO articles (title, content, tags, publication_date)
-VALUES ($1, $2, $3, $4)
+INSERT INTO articles (title, slug, content, tags, publication_date)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING id
 `
 
 type CreateArticleParams struct {
 	Title           string
+	Slug            string
 	Content         string
 	Tags            []string
 	PublicationDate time.Time
@@ -28,6 +29,7 @@ type CreateArticleParams struct {
 func (q *Queries) CreateArticle(ctx context.Context, arg CreateArticleParams) (int64, error) {
 	row := q.db.QueryRowContext(ctx, createArticle,
 		arg.Title,
+		arg.Slug,
 		arg.Content,
 		pq.Array(arg.Tags),
 		arg.PublicationDate,
@@ -65,7 +67,7 @@ func (q *Queries) DeleteArticleByID(ctx context.Context, id int64) (DeleteArticl
 }
 
 const getAllArticles = `-- name: GetAllArticles :many
-SELECT id, title, content, tags, publication_date, created_at, updated_at FROM articles
+SELECT id, title, slug, content, tags, publication_date, created_at, updated_at FROM articles
 `
 
 func (q *Queries) GetAllArticles(ctx context.Context) ([]Article, error) {
@@ -80,6 +82,7 @@ func (q *Queries) GetAllArticles(ctx context.Context) ([]Article, error) {
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
+			&i.Slug,
 			&i.Content,
 			pq.Array(&i.Tags),
 			&i.PublicationDate,
@@ -130,7 +133,7 @@ func (q *Queries) GetAllTags(ctx context.Context) ([]string, error) {
 }
 
 const getArticleByID = `-- name: GetArticleByID :one
-SELECT id, title, content, tags, publication_date, created_at, updated_at FROM articles
+SELECT id, title, slug, content, tags, publication_date, created_at, updated_at FROM articles
 WHERE id = $1 LIMIT 1
 `
 
@@ -140,6 +143,7 @@ func (q *Queries) GetArticleByID(ctx context.Context, id int64) (Article, error)
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
+		&i.Slug,
 		&i.Content,
 		pq.Array(&i.Tags),
 		&i.PublicationDate,
@@ -149,17 +153,18 @@ func (q *Queries) GetArticleByID(ctx context.Context, id int64) (Article, error)
 	return i, err
 }
 
-const getArticleByTitle = `-- name: GetArticleByTitle :one
-SELECT id, title, content, tags, publication_date, created_at, updated_at FROM articles
-WHERE title = $1 LIMIT 1
+const getArticleBySlug = `-- name: GetArticleBySlug :one
+SELECT id, title, slug, content, tags, publication_date, created_at, updated_at FROM articles
+WHERE slug = $1 LIMIT 1
 `
 
-func (q *Queries) GetArticleByTitle(ctx context.Context, title string) (Article, error) {
-	row := q.db.QueryRowContext(ctx, getArticleByTitle, title)
+func (q *Queries) GetArticleBySlug(ctx context.Context, slug string) (Article, error) {
+	row := q.db.QueryRowContext(ctx, getArticleBySlug, slug)
 	var i Article
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
+		&i.Slug,
 		&i.Content,
 		pq.Array(&i.Tags),
 		&i.PublicationDate,
@@ -170,7 +175,7 @@ func (q *Queries) GetArticleByTitle(ctx context.Context, title string) (Article,
 }
 
 const getArticlesByTags = `-- name: GetArticlesByTags :many
-SELECT id, title, content, tags, publication_date, created_at, updated_at FROM articles
+SELECT id, title, slug, content, tags, publication_date, created_at, updated_at FROM articles
 WHERE tags && $1::text[]
 `
 
@@ -186,6 +191,7 @@ func (q *Queries) GetArticlesByTags(ctx context.Context, tags []string) ([]Artic
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
+			&i.Slug,
 			&i.Content,
 			pq.Array(&i.Tags),
 			&i.PublicationDate,

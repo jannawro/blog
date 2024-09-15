@@ -1,6 +1,6 @@
 -- name: CreateArticle :one
-INSERT INTO articles (title, content, tags, publication_date)
-VALUES ($1, $2, $3, $4)
+INSERT INTO articles (title, slug, content, tags, publication_date)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING id;
 
 -- name: GetAllArticles :many
@@ -10,9 +10,9 @@ SELECT * FROM articles;
 SELECT * FROM articles
 WHERE id = $1 LIMIT 1;
 
--- name: GetArticleByTitle :one
+-- name: GetArticleBySlug :one
 SELECT * FROM articles
-WHERE title = $1 LIMIT 1;
+WHERE slug = $1 LIMIT 1;
 
 -- name: GetArticlesByTags :many
 SELECT * FROM articles

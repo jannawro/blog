@@ -24,7 +24,8 @@ func TestUnmarshalToArticle(t *testing.T) {
 
 	assert := assert.New(t)
 
-	assert.Equal("fondant-recipe", a.Title)
+	assert.Equal("Fondant recipe", a.Title)
+	assert.Equal("fondant-recipe", a.Slug)
 
 	assert.Equal([]string{"cooking", "sweets"}, a.Tags)
 

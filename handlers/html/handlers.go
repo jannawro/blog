@@ -3,7 +3,6 @@ package html
 import (
 	"errors"
 	"net/http"
-	"strconv"
 
 	a "github.com/jannawro/blog/article"
 	"github.com/jannawro/blog/components"
@@ -22,21 +21,14 @@ func (h *Handler) ServeArticle() http.HandlerFunc {
 		ctx := r.Context()
 
 		// Extract title from URL path parameter
-		id := r.PathValue("id")
-		if id == "" {
+		slug := r.PathValue("slug")
+		if slug == "" {
 			http.Error(w, "Article title is required", http.StatusBadRequest)
 			return
 		}
 
-		// URL-decode the title if it contains special characters
-		decodedID, err := strconv.Atoi(id)
-		if err != nil {
-			http.Error(w, "Invalid article ID", http.StatusBadRequest)
-			return
-		}
-
 		// Fetch article by title
-		article, err := h.service.GetByID(ctx, int64(decodedID))
+		article, err := h.service.GetBySlug(ctx, slug)
 		if err != nil {
 			if errors.Is(err, a.ErrArticleNotFound) {
 				http.Error(w, "Article not found", http.StatusNotFound)

@@ -27,6 +27,7 @@ var (
 type Article struct {
 	ID              int64
 	Title           string
+	Slug            string
 	Content         string
 	Tags            []string
 	PublicationDate time.Time
@@ -38,15 +39,11 @@ type ArticleRepository interface {
 	Create(ctx context.Context, article Article) (*Article, error)
 	GetAll(ctx context.Context) (Articles, error)
 	GetByID(ctx context.Context, id int64) (*Article, error)
-	GetByTitle(ctx context.Context, title string) (*Article, error)
+	GetBySlug(ctx context.Context, slug string) (*Article, error)
 	GetByTags(ctx context.Context, tags []string) (Articles, error)
 	GetAllTags(ctx context.Context) ([]string, error)
 	Update(ctx context.Context, id int64, updated Article) (*Article, error)
 	Delete(ctx context.Context, id int64) error
-}
-
-func (a *Article) URLHappyTitle() string {
-	return strings.ReplaceAll(strings.ToLower(a.Title), " ", "-")
 }
 
 // UnmarshalToArticle parses a markdown file with specific headers and stores the result as an article in a
@@ -67,7 +64,8 @@ func UnmarshalToArticle(data []byte, a *Article) error {
 		}
 	}
 
-	a.Title = strings.ReplaceAll(strings.ToLower(headers["title"]), " ", "-")
+	a.Title = headers["title"]
+	a.Slug = strings.ReplaceAll(strings.ToLower(headers["title"]), " ", "-")
 	date, err := time.Parse(publicationDateFormat, headers["publicationDate"])
 	if err != nil {
 		return ErrInvalidDateFormat

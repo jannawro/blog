@@ -5,14 +5,14 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/jannawro/blog/article"
+	a "github.com/jannawro/blog/article"
 )
 
 type Handler struct {
-	service *article.Service
+	service *a.Service
 }
 
-func NewHandler(service *article.Service) *Handler {
+func NewHandler(service *a.Service) *Handler {
 	return &Handler{
 		service: service,
 	}
@@ -36,9 +36,9 @@ func (h *Handler) CreateArticle(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) GetAllArticles(w http.ResponseWriter, r *http.Request) {
 	sortBy := r.URL.Query().Get("sort")
-	var sortOption *article.SortOption
+	var sortOption *a.SortOption
 	if sortBy != "" {
-		so := article.SortOption(sortBy)
+		so := a.SortOption(sortBy)
 		sortOption = &so
 	}
 
@@ -53,9 +53,9 @@ func (h *Handler) GetAllArticles(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) GetArticleByTitle(w http.ResponseWriter, r *http.Request) {
 	title := r.PathValue("title")
-	article, err := h.service.GetByTitle(r.Context(), title)
+	article, err := h.service.GetBySlug(r.Context(), title)
 	if err != nil {
-		if err == article.ErrArticleNotFound {
+		if err == a.ErrArticleNotFound {
 			http.Error(w, err.Error(), http.StatusNotFound)
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -76,7 +76,7 @@ func (h *Handler) GetArticleByID(w http.ResponseWriter, r *http.Request) {
 
 	article, err := h.service.GetByID(r.Context(), id)
 	if err != nil {
-		if err == article.ErrArticleNotFound {
+		if err == a.ErrArticleNotFound {
 			http.Error(w, err.Error(), http.StatusNotFound)
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -90,9 +90,9 @@ func (h *Handler) GetArticleByID(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) GetArticlesByTags(w http.ResponseWriter, r *http.Request) {
 	tags := r.URL.Query()["tag"]
 	sortBy := r.URL.Query().Get("sort")
-	var sortOption *article.SortOption
+	var sortOption *a.SortOption
 	if sortBy != "" {
-		so := article.SortOption(sortBy)
+		so := a.SortOption(sortBy)
 		sortOption = &so
 	}
 
@@ -113,9 +113,9 @@ func (h *Handler) UpdateArticleByTitle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	article, err := h.service.UpdateByTitle(r.Context(), title, updatedData)
+	article, err := h.service.UpdateBySlug(r.Context(), title, updatedData)
 	if err != nil {
-		if err == article.ErrArticleNotFound {
+		if err == a.ErrArticleNotFound {
 			http.Error(w, err.Error(), http.StatusNotFound)
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -128,9 +128,9 @@ func (h *Handler) UpdateArticleByTitle(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) DeleteArticleByTitle(w http.ResponseWriter, r *http.Request) {
 	title := r.PathValue("title")
-	err := h.service.DeleteByTitle(r.Context(), title)
+	err := h.service.DeleteBySlug(r.Context(), title)
 	if err != nil {
-		if err == article.ErrArticleNotFound {
+		if err == a.ErrArticleNotFound {
 			http.Error(w, err.Error(), http.StatusNotFound)
 		} else {
 			http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -12,6 +12,7 @@ import (
 type Article struct {
 	ID              int64
 	Title           string
+	Slug            string
 	Content         string
 	Tags            []string
 	PublicationDate time.Time

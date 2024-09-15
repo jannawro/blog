@@ -36,8 +36,8 @@ func (s *Service) GetAll(ctx context.Context, sortBy *SortOption) (Articles, err
 	return articles, nil
 }
 
-func (s *Service) GetByTitle(ctx context.Context, title string) (*Article, error) {
-	article, err := s.repo.GetByTitle(ctx, title)
+func (s *Service) GetBySlug(ctx context.Context, slug string) (*Article, error) {
+	article, err := s.repo.GetBySlug(ctx, slug)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("%w: %v", ErrArticleNotFound, err)
@@ -73,12 +73,12 @@ func (s *Service) GetByTags(
 	return articles, nil
 }
 
-func (s *Service) UpdateByTitle(
+func (s *Service) UpdateBySlug(
 	ctx context.Context,
-	title string,
+	slug string,
 	updatedData []byte,
 ) (*Article, error) {
-	existingArticle, err := s.repo.GetByTitle(ctx, title)
+	existingArticle, err := s.repo.GetBySlug(ctx, slug)
 	if err != nil {
 		return nil, err
 	}
@@ -92,8 +92,8 @@ func (s *Service) UpdateByTitle(
 	return s.repo.Update(ctx, existingArticle.ID, updatedArticle)
 }
 
-func (s *Service) DeleteByTitle(ctx context.Context, title string) error {
-	article, err := s.repo.GetByTitle(ctx, title)
+func (s *Service) DeleteBySlug(ctx context.Context, slug string) error {
+	article, err := s.repo.GetBySlug(ctx, slug)
 	if err != nil {
 		return err
 	}

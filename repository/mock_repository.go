@@ -53,12 +53,12 @@ func (m *MockRepository) GetByID(ctx context.Context, id int64) (*article.Articl
 	return nil, errors.New("article not found")
 }
 
-func (m *MockRepository) GetByTitle(ctx context.Context, title string) (*article.Article, error) {
+func (m *MockRepository) GetBySlug(ctx context.Context, slug string) (*article.Article, error) {
 	m.mutex.RLock()
 	defer m.mutex.RUnlock()
 
 	for _, article := range m.articles {
-		if article.Title == title {
+		if article.Slug == slug {
 			return &article, nil
 		}
 	}
