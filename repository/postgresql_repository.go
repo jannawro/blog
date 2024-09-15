@@ -8,8 +8,9 @@ import (
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
-	"github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/jannawro/blog/article"
+	"github.com/jannawro/blog/repository/migrations"
 	_ "github.com/lib/pq"
 )
 
@@ -47,14 +48,14 @@ func runMigration(db *sql.DB) error {
 		return fmt.Errorf("failed to create database driver: %w", err)
 	}
 
-	// Create a file source for the migration
-	fileSource, err := (&file.File{}).Open("file://repository/sqlc/migrations")
+	// Create an embed source for the migration
+	embedSource, err := iofs.New(migrations.MigrationsFS, ".")
 	if err != nil {
-		return fmt.Errorf("failed to create file source: %w", err)
+		return fmt.Errorf("failed to create embed source: %w", err)
 	}
 
 	m, err := migrate.NewWithInstance(
-		"file", fileSource,
+		"iofs", embedSource,
 		"postgres", driver)
 	if err != nil {
 		return fmt.Errorf("failed to create migrate instance: %w", err)
