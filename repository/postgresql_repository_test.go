@@ -55,7 +55,7 @@ func TestPostgresqlRepository(t *testing.T) {
 	db, cleanup := setupTestDatabase(t)
 	defer cleanup()
 
-	repo, err := NewPostgresqlRepository(db)
+	repo, err := NewPostgresqlRepository(fmt.Sprintf("postgres://testuser:testpass@%s:%s/testdb?sslmode=disable", host, port.Port()))
 	require.NoError(t, err)
 
 	ctx := context.Background()
