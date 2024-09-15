@@ -52,7 +52,7 @@ func runMigration(db *sql.DB) error {
 	}
 
 	// Create an embed source for the migration
-	embedSource, err := iofs.New(migrationsFiles, ".")
+	embedSource, err := iofs.New(migrationsFiles, "sqlc/migrations/")
 	if err != nil {
 		return fmt.Errorf("failed to create embed source: %w", err)
 	}
