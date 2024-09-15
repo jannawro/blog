@@ -90,8 +90,8 @@ func TestGetAllArticles(t *testing.T) {
 func TestGetArticleByTitle(t *testing.T) {
 	handler, mockRepo := setupTest()
 
-	expectedArticle := &article.Article{ID: 1, Title: "Test Article", Slug: "test-article"}
-	mockRepo.SetArticles([]article.Article{*expectedArticle})
+	expectedArticle := article.Article{ID: 1, Title: "Test Article", Slug: "test-article"}
+	mockRepo.SetArticles([]article.Article{expectedArticle})
 
 	req, err := http.NewRequest("GET", "/articles/test-article", nil)
 	assert.NoError(t, err)
