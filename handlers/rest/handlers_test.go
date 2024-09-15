@@ -94,10 +94,7 @@ func TestGetArticleByTitle(t *testing.T) {
 	expectedArticle := article.Article{ID: 1, Title: "Test Article", Slug: "test-article"}
 	mockRepo.SetArticles([]article.Article{expectedArticle})
 
-	req, err := http.NewRequest("GET", "/articles/test-article", nil)
-	assert.NoError(t, err)
-
-	// Set up the path parameter
+	req := httptest.NewRequest("GET", "/articles/test-article", nil)
 	req = req.WithContext(context.WithValue(req.Context(), "title", "test-article"))
 
 	rr := httptest.NewRecorder()
@@ -106,7 +103,7 @@ func TestGetArticleByTitle(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rr.Code)
 
 	var response article.Article
-	err = json.Unmarshal(rr.Body.Bytes(), &response)
+	err := json.NewDecoder(rr.Body).Decode(&response)
 	assert.NoError(t, err)
 	assert.Equal(t, expectedArticle.Title, response.Title)
 	assert.Equal(t, expectedArticle.Slug, response.Slug)
