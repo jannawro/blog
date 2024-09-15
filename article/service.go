@@ -17,7 +17,11 @@ func NewService(repo ArticleRepository) *Service {
 	return &Service{repo: repo}
 }
 
-func (s *Service) Create(ctx context.Context, article Article) (*Article, error) {
+func (s *Service) Create(ctx context.Context, articleData []byte) (*Article, error) {
+	var article Article
+	if err := UnmarshalToArticle(articleData, &article); err != nil {
+		return nil, err
+	}
 	return s.repo.Create(ctx, article)
 }
 
