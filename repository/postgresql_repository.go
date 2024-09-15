@@ -14,7 +14,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-//go:embed sqlc/migrations/*
+//go:embed migrations/*.sql
 var migrationsFiles embed.FS
 
 type PostgresqlRepository struct {
@@ -52,7 +52,7 @@ func runMigration(db *sql.DB) error {
 	}
 
 	// Create an embed source for the migration
-	embedSource, err := iofs.New(migrationsFiles, "sqlc/migrations/")
+	embedSource, err := iofs.New(migrationsFiles, "migrations")
 	if err != nil {
 		return fmt.Errorf("failed to create embed source: %w", err)
 	}
