@@ -16,8 +16,8 @@ func NewHandler(service *a.Service) *Handler {
 	return &Handler{service: service}
 }
 
-func (h *Handler) ServeArticle() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) ServeArticle() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
 		// Extract title from URL path parameter
@@ -50,8 +50,8 @@ func (h *Handler) ServeArticle() http.HandlerFunc {
 	}
 }
 
-func (h *Handler) ServeBlog() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) ServeBlog() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
 		sortOption := getSortOption(r)
@@ -81,8 +81,8 @@ func (h *Handler) ServeBlog() http.HandlerFunc {
 	}
 }
 
-func (h *Handler) ServeIndex() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) ServeIndex() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
 		// Fetch all tags
