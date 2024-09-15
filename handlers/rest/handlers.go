@@ -120,13 +120,15 @@ func (h *Handler) GetArticlesByTags() http.Handler {
 func (h *Handler) UpdateArticleByTitle() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		title := r.PathValue("title")
-		var updatedData []byte
-		if err := json.NewDecoder(r.Body).Decode(&updatedData); err != nil {
+		var updatedArticleDate struct {
+			Article string `json:"article"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&updatedArticleDate); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		article, err := h.service.UpdateBySlug(r.Context(), title, updatedData)
+		article, err := h.service.UpdateBySlug(r.Context(), title, []byte(updatedArticleDate.Article))
 		if err != nil {
 			if err == a.ErrArticleNotFound {
 				http.Error(w, err.Error(), http.StatusNotFound)
