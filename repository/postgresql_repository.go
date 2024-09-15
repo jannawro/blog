@@ -88,6 +88,7 @@ func (r *PostgresqlRepository) Create(ctx context.Context, article article.Artic
 	qtx := r.q.WithTx(tx)
 	id, err := qtx.CreateArticle(ctx, CreateArticleParams{
 		Title:           article.Title,
+		Slug:            article.Slug,
 		Content:         article.Content,
 		Tags:            article.Tags,
 		PublicationDate: article.PublicationDate,
@@ -115,6 +116,7 @@ func (r *PostgresqlRepository) GetAll(ctx context.Context) (article.Articles, er
 		articlesSlice[i] = article.Article{
 			ID:              a.ID,
 			Title:           a.Title,
+			Slug:            a.Slug,
 			Content:         a.Content,
 			Tags:            a.Tags,
 			PublicationDate: a.PublicationDate,
@@ -133,6 +135,7 @@ func (r *PostgresqlRepository) GetByID(ctx context.Context, id int64) (*article.
 	return &article.Article{
 		ID:              dbArticle.ID,
 		Title:           dbArticle.Title,
+		Slug:            dbArticle.Slug,
 		Content:         dbArticle.Content,
 		Tags:            dbArticle.Tags,
 		PublicationDate: dbArticle.PublicationDate,
@@ -148,6 +151,7 @@ func (r *PostgresqlRepository) GetBySlug(ctx context.Context, slug string) (*art
 	return &article.Article{
 		ID:              dbArticle.ID,
 		Title:           dbArticle.Title,
+		Slug:            dbArticle.Slug,
 		Content:         dbArticle.Content,
 		Tags:            dbArticle.Tags,
 		PublicationDate: dbArticle.PublicationDate,
@@ -165,6 +169,7 @@ func (r *PostgresqlRepository) GetByTags(ctx context.Context, tags []string) (ar
 		articlesSlice[i] = article.Article{
 			ID:              a.ID,
 			Title:           a.Title,
+			Slug:            a.Slug,
 			Content:         a.Content,
 			Tags:            a.Tags,
 			PublicationDate: a.PublicationDate,
@@ -195,6 +200,7 @@ func (r *PostgresqlRepository) Update(
 	dbArticle, err := qtx.UpdateArticleByID(ctx, UpdateArticleByIDParams{
 		ID:              id,
 		Title:           updated.Title,
+		Slug:            updated.Slug,
 		Content:         updated.Content,
 		Tags:            updated.Tags,
 		PublicationDate: updated.PublicationDate,
@@ -210,6 +216,7 @@ func (r *PostgresqlRepository) Update(
 	return &article.Article{
 		ID:              dbArticle.ID,
 		Title:           dbArticle.Title,
+		Slug:            dbArticle.Slug,
 		Content:         dbArticle.Content,
 		Tags:            dbArticle.Tags,
 		PublicationDate: dbArticle.PublicationDate,

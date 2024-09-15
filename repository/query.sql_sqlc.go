@@ -42,12 +42,13 @@ func (q *Queries) CreateArticle(ctx context.Context, arg CreateArticleParams) (i
 const deleteArticleByID = `-- name: DeleteArticleByID :one
 DELETE FROM articles
 WHERE id = $1
-RETURNING id, title, content, tags, publication_date
+RETURNING id, title, slug, content, tags, publication_date
 `
 
 type DeleteArticleByIDRow struct {
 	ID              int64
 	Title           string
+	Slug            string
 	Content         string
 	Tags            []string
 	PublicationDate time.Time
@@ -59,6 +60,7 @@ func (q *Queries) DeleteArticleByID(ctx context.Context, id int64) (DeleteArticl
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
+		&i.Slug,
 		&i.Content,
 		pq.Array(&i.Tags),
 		&i.PublicationDate,
@@ -214,15 +216,17 @@ func (q *Queries) GetArticlesByTags(ctx context.Context, tags []string) ([]Artic
 const updateArticleByID = `-- name: UpdateArticleByID :one
 UPDATE articles
 SET title = $1,
-    content = $2,
-    tags = $3,
-    publication_date = $4
-WHERE id = $5
-RETURNING id, title, content, tags, publication_date
+    slug = $2,
+    content = $3,
+    tags = $4,
+    publication_date = $5
+WHERE id = $6
+RETURNING id, title, slug, content, tags, publication_date
 `
 
 type UpdateArticleByIDParams struct {
 	Title           string
+	Slug            string
 	Content         string
 	Tags            []string
 	PublicationDate time.Time
@@ -232,6 +236,7 @@ type UpdateArticleByIDParams struct {
 type UpdateArticleByIDRow struct {
 	ID              int64
 	Title           string
+	Slug            string
 	Content         string
 	Tags            []string
 	PublicationDate time.Time
@@ -240,6 +245,7 @@ type UpdateArticleByIDRow struct {
 func (q *Queries) UpdateArticleByID(ctx context.Context, arg UpdateArticleByIDParams) (UpdateArticleByIDRow, error) {
 	row := q.db.QueryRowContext(ctx, updateArticleByID,
 		arg.Title,
+		arg.Slug,
 		arg.Content,
 		pq.Array(arg.Tags),
 		arg.PublicationDate,
@@ -249,6 +255,7 @@ func (q *Queries) UpdateArticleByID(ctx context.Context, arg UpdateArticleByIDPa
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
+		&i.Slug,
 		&i.Content,
 		pq.Array(&i.Tags),
 		&i.PublicationDate,

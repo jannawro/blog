@@ -27,13 +27,14 @@ ORDER BY unique_tag ASC;
 -- name: UpdateArticleByID :one
 UPDATE articles
 SET title = $1,
-    content = $2,
-    tags = $3,
-    publication_date = $4
-WHERE id = $5
-RETURNING id, title, content, tags, publication_date;
+    slug = $2,
+    content = $3,
+    tags = $4,
+    publication_date = $5
+WHERE id = $6
+RETURNING id, title, slug, content, tags, publication_date;
 
 -- name: DeleteArticleByID :one
 DELETE FROM articles
 WHERE id = $1
-RETURNING id, title, content, tags, publication_date;
+RETURNING id, title, slug, content, tags, publication_date;
