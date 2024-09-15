@@ -18,7 +18,8 @@ func NewHandler(service *a.Service) *Handler {
 	}
 }
 
-func (h *Handler) CreateArticle(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) CreateArticle() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	var articleData []byte
 	if err := json.NewDecoder(r.Body).Decode(&articleData); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -31,10 +32,12 @@ func (h *Handler) CreateArticle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(article)
+		json.NewEncoder(w).Encode(article)
+	})
 }
 
-func (h *Handler) GetAllArticles(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetAllArticles() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	sortBy := r.URL.Query().Get("sort")
 	var sortOption *a.SortOption
 	if sortBy != "" {
@@ -48,10 +51,12 @@ func (h *Handler) GetAllArticles(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(articles)
+		json.NewEncoder(w).Encode(articles)
+	})
 }
 
-func (h *Handler) GetArticleByTitle(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetArticleByTitle() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	title := r.PathValue("title")
 	article, err := h.service.GetBySlug(r.Context(), title)
 	if err != nil {
@@ -63,10 +68,12 @@ func (h *Handler) GetArticleByTitle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(article)
+		json.NewEncoder(w).Encode(article)
+	})
 }
 
-func (h *Handler) GetArticleByID(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetArticleByID() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -84,10 +91,12 @@ func (h *Handler) GetArticleByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(article)
+		json.NewEncoder(w).Encode(article)
+	})
 }
 
-func (h *Handler) GetArticlesByTags(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetArticlesByTags() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	tags := r.URL.Query()["tag"]
 	sortBy := r.URL.Query().Get("sort")
 	var sortOption *a.SortOption
@@ -102,10 +111,12 @@ func (h *Handler) GetArticlesByTags(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(articles)
+		json.NewEncoder(w).Encode(articles)
+	})
 }
 
-func (h *Handler) UpdateArticleByTitle(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) UpdateArticleByTitle() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	title := r.PathValue("title")
 	var updatedData []byte
 	if err := json.NewDecoder(r.Body).Decode(&updatedData); err != nil {
@@ -123,10 +134,12 @@ func (h *Handler) UpdateArticleByTitle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(article)
+		json.NewEncoder(w).Encode(article)
+	})
 }
 
-func (h *Handler) DeleteArticleByTitle(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) DeleteArticleByTitle() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	title := r.PathValue("title")
 	err := h.service.DeleteBySlug(r.Context(), title)
 	if err != nil {
@@ -138,15 +151,18 @@ func (h *Handler) DeleteArticleByTitle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+		w.WriteHeader(http.StatusNoContent)
+	})
 }
 
-func (h *Handler) GetAllTags(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetAllTags() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	tags, err := h.service.GetAllTags(r.Context())
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	json.NewEncoder(w).Encode(tags)
+		json.NewEncoder(w).Encode(tags)
+	})
 }
