@@ -29,9 +29,9 @@ func main() {
 
 	frontendRouter := http.NewServeMux()
 	frontendRouter.Handle("GET /static/", static.Handler("/static/"))
-	frontendRouter.HandleFunc("GET /", htmlHandler.ServeBlog())
-	frontendRouter.HandleFunc("GET /index", htmlHandler.ServeIndex())
-	frontendRouter.HandleFunc("GET /article/{title}", htmlHandler.ServeArticle())
+	frontendRouter.Handle("GET /", htmlHandler.ServeBlog())
+	frontendRouter.Handle("GET /index", htmlHandler.ServeIndex())
+	frontendRouter.Handle("GET /article/{title}", htmlHandler.ServeArticle())
 	frontendStack := middleware.CreateStack(
 		middleware.Logging,
 	)
