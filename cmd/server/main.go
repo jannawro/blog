@@ -8,6 +8,7 @@ import (
 
 	"github.com/jannawro/blog/article"
 	"github.com/jannawro/blog/handlers/html"
+	"github.com/jannawro/blog/handlers/rest"
 	"github.com/jannawro/blog/middleware"
 	"github.com/jannawro/blog/repository"
 	"github.com/jannawro/blog/static"
@@ -24,21 +25,24 @@ func main() {
 	mockRepo := initMockRepository()
 	articleService := article.NewService(mockRepo)
 	htmlHandler := html.NewHandler(articleService)
+	restHandler := rest.NewHandler(articleService)
 
-	router := http.NewServeMux()
+	frontendRouter := http.NewServeMux()
+	frontendRouter.Handle("GET /static/", static.Handler("/static/"))
+	frontendRouter.HandleFunc("GET /", htmlHandler.ServeBlog())
+	frontendRouter.HandleFunc("GET /index", htmlHandler.ServeIndex())
+	frontendRouter.HandleFunc("GET /article/{slug}", htmlHandler.ServeArticle())
 
-	router.Handle("GET /static/", static.Handler("/static/"))
-	router.HandleFunc("GET /", htmlHandler.ServeBlog())
-	router.HandleFunc("GET /index", htmlHandler.ServeIndex())
-	router.HandleFunc("GET /article/{slug}", htmlHandler.ServeArticle())
+	apiRouter := http.NewServeMux()
+	apiRouter.Handle("GET /api/articles", restHandler.GetAllArticles)
 
-	stack := middleware.CreateStack(
+	frontendStack := middleware.CreateStack(
 		middleware.Logging,
 	)
 
 	server := http.Server{
 		Addr:    ":" + port,
-		Handler: stack(router),
+		Handler: frontendStack(frontendRouter),
 	}
 
 	log.Println("Listening on", port)
