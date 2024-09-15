@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/jannawro/blog/article"
+	"github.com/jannawro/blog/handlers/assets"
 	"github.com/jannawro/blog/handlers/html"
 	"github.com/jannawro/blog/handlers/rest"
 	"github.com/jannawro/blog/middleware"
 	"github.com/jannawro/blog/repository"
-	"github.com/jannawro/blog/static"
 )
 
 var (
@@ -23,13 +23,15 @@ var (
 func main() {
 	parseArguments()
 
+	assetsPath := "/assets/"
+
 	mockRepo := initMockRepository()
 	articleService := article.NewService(mockRepo)
-	htmlHandler := html.NewHandler(articleService)
+	htmlHandler := html.NewHandler(articleService, assetsPath)
 	restHandler := rest.NewHandler(articleService)
 
 	frontendRouter := http.NewServeMux()
-	frontendRouter.Handle("GET /static/", static.Handler("/static/"))
+	frontendRouter.Handle("GET "+assetsPath, assets.Serve(assetsPath))
 	frontendRouter.Handle("GET /", htmlHandler.ServeBlog())
 	frontendRouter.Handle("GET /index", htmlHandler.ServeIndex())
 	frontendRouter.Handle("GET /article/{title}", htmlHandler.ServeArticle())

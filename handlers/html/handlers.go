@@ -1,6 +1,7 @@
 package html
 
 import (
+	"embed"
 	"errors"
 	"net/http"
 
@@ -8,12 +9,18 @@ import (
 	"github.com/jannawro/blog/components"
 )
 
+var assets embed.FS
+
 type Handler struct {
-	service *a.Service
+	service    *a.Service
+	assetsPath string
 }
 
-func NewHandler(service *a.Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(service *a.Service, assetsPath string) *Handler {
+	return &Handler{
+		service:    service,
+		assetsPath: assetsPath,
+	}
 }
 
 func (h *Handler) ServeArticle() http.Handler {
@@ -39,7 +46,7 @@ func (h *Handler) ServeArticle() http.Handler {
 		}
 
 		// Generate HTML using ArticlePage component
-		articlePage := components.ArticlePage(*article)
+		articlePage := components.ArticlePage(*article, h.assetsPath)
 
 		// Render the HTML
 		err = articlePage.Render(ctx, w)
@@ -71,7 +78,7 @@ func (h *Handler) ServeBlog() http.Handler {
 			return
 		}
 
-		blogComponent := components.Blog(articles)
+		blogComponent := components.Blog(articles, h.assetsPath)
 
 		err = blogComponent.Render(ctx, w)
 		if err != nil {
@@ -106,7 +113,7 @@ func (h *Handler) ServeIndex() http.Handler {
 		}
 
 		// Create and render TagIndexPage component
-		indexPage := components.TagIndexPage(taggedArticles)
+		indexPage := components.TagIndexPage(taggedArticles, h.assetsPath)
 		err = indexPage.Render(ctx, w)
 		if err != nil {
 			http.Error(w, "Failed to render index page", http.StatusInternalServerError)

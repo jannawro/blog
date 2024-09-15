@@ -23,13 +23,13 @@ tasks:
   assets:
     desc: Build tailwind assets
     cmds:
-      - npx tailwindcss -i ./tailwind.css -o ./static/styles.css
+      - npx tailwindcss -i ./tailwind.css -o ./handlers/assets/styles.css
     sources:
       - ./**/*.templ
       - ./tailwind.css
       - ./tailwind.config.js
     generates:
-      - ./static/styles.css
+      - ./handlers/assets/styles.css
 
   generate:
     desc: Code generation
