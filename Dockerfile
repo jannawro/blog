@@ -12,7 +12,7 @@ COPY tailwind.css ./
 COPY **/*.templ ./
 
 RUN mkdir static
-RUN npx tailwindcss -i ./tailwind.css -o ./static/styles.css
+RUN npx tailwindcss -i ./tailwind.css -o ./styles.css
 
 # Build a binary
 FROM golang:1.22 AS build-app
@@ -28,7 +28,7 @@ RUN go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 COPY . .
 
 ## copy built css from build-css
-COPY --from=build-css /app/static/styles.css ./static/styles.css
+COPY --from=build-css /app/styles.css ./handlers/assets/styles.css
 
 ## generate go code
 RUN go generate ./...

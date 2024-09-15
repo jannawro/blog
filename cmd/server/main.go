@@ -20,10 +20,10 @@ var (
 	postgresConnStr string
 )
 
+const assetsPath = "/assets/"
+
 func main() {
 	parseArguments()
-
-	assetsPath := "/assets/"
 
 	mockRepo := initMockRepository()
 	articleService := article.NewService(mockRepo)
