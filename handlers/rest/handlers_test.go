@@ -2,6 +2,7 @@ package rest_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -95,6 +96,9 @@ func TestGetArticleByTitle(t *testing.T) {
 
 	req, err := http.NewRequest("GET", "/articles/test-article", nil)
 	assert.NoError(t, err)
+
+	// Set up the path parameter
+	req = req.WithContext(context.WithValue(req.Context(), "title", "test-article"))
 
 	rr := httptest.NewRecorder()
 	handler.GetArticleByTitle().ServeHTTP(rr, req)
