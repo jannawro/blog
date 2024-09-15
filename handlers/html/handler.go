@@ -23,19 +23,19 @@ func NewHandler(service *a.Service, assetsPath string) *Handler {
 	}
 }
 
-func (h *Handler) ServeArticle() http.Handler {
+func (h *Handler) ServeArticle(slugPathParam string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
-		// Extract title from URL path parameter
-		title := r.PathValue("title")
-		if title == "" {
+		// Extract slug from URL path parameter
+		slug := r.PathValue(slugPathParam)
+		if slug == "" {
 			http.Error(w, "Article title is required", http.StatusBadRequest)
 			return
 		}
 
 		// Fetch article by title
-		article, err := h.service.GetBySlug(ctx, title)
+		article, err := h.service.GetBySlug(ctx, slug)
 		if err != nil {
 			if errors.Is(err, a.ErrArticleNotFound) {
 				http.Error(w, "Article not found", http.StatusNotFound)

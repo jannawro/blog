@@ -25,8 +25,12 @@ const assetsPath = "/assets/"
 func main() {
 	parseArguments()
 
-	mockRepo := initMockRepository()
-	articleService := article.NewService(mockRepo)
+	postgresRepo, err := repository.NewPostgresqlRepository(postgresConnStr)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_ = initMockRepository()
+	articleService := article.NewService(postgresRepo)
 	htmlHandler := html.NewHandler(articleService, assetsPath)
 	restHandler := rest.NewHandler(articleService)
 
@@ -34,7 +38,7 @@ func main() {
 	frontendRouter.Handle("GET "+assetsPath, assets.Serve(assetsPath))
 	frontendRouter.Handle("GET /", htmlHandler.ServeBlog())
 	frontendRouter.Handle("GET /index", htmlHandler.ServeIndex())
-	frontendRouter.Handle("GET /article/{title}", htmlHandler.ServeArticle())
+	frontendRouter.Handle("GET /article/{title}", htmlHandler.ServeArticle("title"))
 	frontendStack := middleware.CreateStack(
 		middleware.Logging,
 	)
@@ -42,11 +46,11 @@ func main() {
 	apiRouter := http.NewServeMux()
 	apiRouter.Handle("POST /api/articles", restHandler.CreateArticle())
 	apiRouter.Handle("GET /api/articles", restHandler.GetAllArticles())
-	apiRouter.Handle("GET /api/articles/title/{title}", restHandler.GetArticleByTitle())
-	apiRouter.Handle("GET /api/articles/id/{id}", restHandler.GetArticleByID())
+	apiRouter.Handle("GET /api/articles/title/{title}", restHandler.GetArticleByTitle("title"))
+	apiRouter.Handle("GET /api/articles/id/{id}", restHandler.GetArticleByID("id"))
 	apiRouter.Handle("GET /api/articles/tags", restHandler.GetArticlesByTags())
-	apiRouter.Handle("PUT /api/articles/{title}", restHandler.UpdateArticleByTitle())
-	apiRouter.Handle("DELETE /api/articles/{title}", restHandler.DeleteArticleByTitle())
+	apiRouter.Handle("PUT /api/articles/{title}", restHandler.UpdateArticleByTitle("title"))
+	apiRouter.Handle("DELETE /api/articles/{title}", restHandler.DeleteArticleByTitle("title"))
 	apiRouter.Handle("GET /api/tags", restHandler.GetAllTags())
 	apiStack := middleware.CreateStack(
 		middleware.Logging,
@@ -68,7 +72,7 @@ func main() {
 	}
 
 	log.Println("Listening on", port)
-	err := server.ListenAndServe()
+	err = server.ListenAndServe()
 	if err != nil {
 		log.Fatal(err)
 	}

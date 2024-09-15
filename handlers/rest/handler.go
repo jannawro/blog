@@ -57,10 +57,10 @@ func (h *Handler) GetAllArticles() http.Handler {
 	})
 }
 
-func (h *Handler) GetArticleByTitle() http.Handler {
+func (h *Handler) GetArticleByTitle(slugPathParam string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		title := r.PathValue("title")
-		article, err := h.service.GetBySlug(r.Context(), title)
+		slug := r.PathValue(slugPathParam)
+		article, err := h.service.GetBySlug(r.Context(), slug)
 		if err != nil {
 			if err == a.ErrArticleNotFound {
 				http.Error(w, err.Error(), http.StatusNotFound)
@@ -74,9 +74,9 @@ func (h *Handler) GetArticleByTitle() http.Handler {
 	})
 }
 
-func (h *Handler) GetArticleByID() http.Handler {
+func (h *Handler) GetArticleByID(idPathParam string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		idStr := r.PathValue("id")
+		idStr := r.PathValue(idPathParam)
 		id, err := strconv.ParseInt(idStr, 10, 64)
 		if err != nil {
 			http.Error(w, "Invalid ID", http.StatusBadRequest)
@@ -117,9 +117,9 @@ func (h *Handler) GetArticlesByTags() http.Handler {
 	})
 }
 
-func (h *Handler) UpdateArticleByTitle() http.Handler {
+func (h *Handler) UpdateArticleByTitle(slugPathParam string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		title := r.PathValue("title")
+		slug := r.PathValue(slugPathParam)
 		var updatedArticleDate struct {
 			Article string `json:"article"`
 		}
@@ -128,7 +128,7 @@ func (h *Handler) UpdateArticleByTitle() http.Handler {
 			return
 		}
 
-		article, err := h.service.UpdateBySlug(r.Context(), title, []byte(updatedArticleDate.Article))
+		article, err := h.service.UpdateBySlug(r.Context(), slug, []byte(updatedArticleDate.Article))
 		if err != nil {
 			if err == a.ErrArticleNotFound {
 				http.Error(w, err.Error(), http.StatusNotFound)
@@ -142,10 +142,10 @@ func (h *Handler) UpdateArticleByTitle() http.Handler {
 	})
 }
 
-func (h *Handler) DeleteArticleByTitle() http.Handler {
+func (h *Handler) DeleteArticleByTitle(slugPathParam string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		title := r.PathValue("title")
-		err := h.service.DeleteBySlug(r.Context(), title)
+		slug := r.PathValue(slugPathParam)
+		err := h.service.DeleteBySlug(r.Context(), slug)
 		if err != nil {
 			if err == a.ErrArticleNotFound {
 				http.Error(w, err.Error(), http.StatusNotFound)
