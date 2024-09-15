@@ -20,13 +20,15 @@ func NewHandler(service *a.Service) *Handler {
 
 func (h *Handler) CreateArticle() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var articleData []byte
+		var articleData struct {
+			Article string `json:"article"`
+		}
 		if err := json.NewDecoder(r.Body).Decode(&articleData); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		article, err := h.service.Create(r.Context(), articleData)
+		article, err := h.service.Create(r.Context(), []byte(articleData.Article))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
