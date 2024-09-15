@@ -95,7 +95,7 @@ func TestGetArticleByTitle(t *testing.T) {
 	mockRepo.SetArticles([]article.Article{expectedArticle})
 
 	req := httptest.NewRequest("GET", "/articles/test-article", nil)
-	req = req.WithContext(context.WithValue(req.Context(), "title", "test-article"))
+	req = req.WithContext(context.WithValue(req.Context(), http.PathVariableKey, map[string]string{"title": "test-article"}))
 
 	rr := httptest.NewRecorder()
 	handler.GetArticleByTitle().ServeHTTP(rr, req)
