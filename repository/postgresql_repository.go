@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"embed"
 	"fmt"
+	"io/fs"
 	"os"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -14,15 +14,12 @@ import (
 	_ "github.com/lib/pq"
 )
 
-//go:embed migrations/*.sql
-var migrationsFiles embed.FS
-
 type PostgresqlRepository struct {
 	db *sql.DB
 	q  *Queries
 }
 
-func NewPostgresqlRepository(connString string) (*PostgresqlRepository, error) {
+func NewPostgresDatabase(connString string) (*sql.DB, error) {
 	db, err := sql.Open("postgres", connString)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database connection: %w", err)
@@ -33,26 +30,29 @@ func NewPostgresqlRepository(connString string) (*PostgresqlRepository, error) {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
+	return db, nil
+}
+
+func NewPostgresqlRepository(database *sql.DB, migrationFiles fs.FS) (*PostgresqlRepository, error) {
 	// Run migration
-	if err := runMigration(db); err != nil {
-		db.Close()
+	if err := runMigration(database, migrationFiles); err != nil {
+		database.Close()
 		return nil, fmt.Errorf("failed to run migration: %w", err)
 	}
-
 	return &PostgresqlRepository{
-		db: db,
-		q:  New(db),
+		db: database,
+		q:  New(database),
 	}, nil
 }
 
-func runMigration(db *sql.DB) error {
+func runMigration(db *sql.DB, migrationFiles fs.FS) error {
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		return fmt.Errorf("failed to create database driver: %w", err)
 	}
 
 	// Create an embed source for the migration
-	embedSource, err := iofs.New(migrationsFiles, "migrations")
+	embedSource, err := iofs.New(migrationFiles, ".")
 	if err != nil {
 		return fmt.Errorf("failed to create embed source: %w", err)
 	}

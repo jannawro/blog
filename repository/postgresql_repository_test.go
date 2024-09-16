@@ -1,61 +1,61 @@
-package repository
+package repository_test
 
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"testing"
 	"time"
 
 	"github.com/jannawro/blog/article"
+	"github.com/jannawro/blog/repository"
+	"github.com/jannawro/blog/repository/migrations"
+	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
 func setupTestDatabase(t *testing.T) (*sql.DB, func()) {
 	ctx := context.Background()
 
-	req := testcontainers.ContainerRequest{
-		Image:        "postgres:13",
-		ExposedPorts: []string{"5432/tcp"},
-		Env: map[string]string{
-			"POSTGRES_DB":       "testdb",
-			"POSTGRES_USER":     "testuser",
-			"POSTGRES_PASSWORD": "testpass",
-		},
-		WaitingFor: wait.ForLog("database system is ready to accept connections"),
-	}
+	dbName := "postgres"
+	dbUser := "postgres"
+	dbPassword := "password"
 
-	postgresC, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
-		ContainerRequest: req,
-		Started:          true,
-	})
-	require.NoError(t, err)
+	postgresContainer, err := postgres.Run(ctx,
+		"docker.io/postgres:16-alpine",
+		postgres.WithDatabase(dbName),
+		postgres.WithUsername(dbUser),
+		postgres.WithPassword(dbPassword),
+		postgres.WithSQLDriver("postgres"),
+		testcontainers.WithWaitStrategy(
+			wait.ForLog("database system is ready to accept connections").
+				WithOccurrence(2).
+				WithStartupTimeout(5*time.Second)),
+	)
+	assert.NoError(t, err)
 
-	host, err := postgresC.Host(ctx)
-	require.NoError(t, err)
-
-	port, err := postgresC.MappedPort(ctx, "5432")
-	require.NoError(t, err)
-
-	connString := fmt.Sprintf("postgres://testuser:testpass@%s:%s/testdb?sslmode=disable", host, port.Port())
+	connString, err := postgresContainer.ConnectionString(ctx, "sslmode=disable")
+	assert.NoError(t, err)
 
 	db, err := sql.Open("postgres", connString)
 	require.NoError(t, err)
 
-	return db, func() {
+	cleanup := func() {
 		db.Close()
-		postgresC.Terminate(ctx)
+		postgresContainer.Terminate(ctx)
 	}
+
+	return db, cleanup
 }
 
 func TestPostgresqlRepository(t *testing.T) {
 	db, cleanup := setupTestDatabase(t)
 	defer cleanup()
 
-	repo, err := NewPostgresqlRepository(fmt.Sprintf("postgres://testuser:testpass@%s:%s/testdb?sslmode=disable", host, port.Port()))
+	repo, err := repository.NewPostgresqlRepository(db, migrations.Files())
 	require.NoError(t, err)
 
 	ctx := context.Background()
@@ -106,6 +106,13 @@ func TestPostgresqlRepository(t *testing.T) {
 		assert.Equal(t, "Updated Test Article", updatedArticle.Title)
 	})
 
+	t.Run("GetAllTags", func(t *testing.T) {
+		tags, err := repo.GetAllTags(ctx)
+		require.NoError(t, err)
+		assert.Contains(t, tags, "test")
+		assert.Contains(t, tags, "golang")
+	})
+
 	t.Run("Delete", func(t *testing.T) {
 		article, err := repo.GetBySlug(ctx, "test-article")
 		require.NoError(t, err)
@@ -117,10 +124,4 @@ func TestPostgresqlRepository(t *testing.T) {
 		assert.Error(t, err)
 	})
 
-	t.Run("GetAllTags", func(t *testing.T) {
-		tags, err := repo.GetAllTags(ctx)
-		require.NoError(t, err)
-		assert.Contains(t, tags, "test")
-		assert.Contains(t, tags, "golang")
-	})
 }

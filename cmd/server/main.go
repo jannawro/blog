@@ -4,7 +4,6 @@ import (
 	"flag"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/jannawro/blog/article"
 	"github.com/jannawro/blog/handlers/assets"
@@ -12,6 +11,7 @@ import (
 	"github.com/jannawro/blog/handlers/rest"
 	"github.com/jannawro/blog/middleware"
 	"github.com/jannawro/blog/repository"
+	"github.com/jannawro/blog/repository/migrations"
 )
 
 var (
@@ -25,11 +25,14 @@ const assetsPath = "/assets/"
 func main() {
 	parseArguments()
 
-	postgresRepo, err := repository.NewPostgresqlRepository(postgresConnStr)
+	postgresDatabase, err := repository.NewPostgresDatabase(postgresConnStr)
 	if err != nil {
 		log.Fatal(err)
 	}
-	_ = initMockRepository()
+	postgresRepo, err := repository.NewPostgresqlRepository(postgresDatabase, migrations.Files())
+	if err != nil {
+		log.Fatal(err)
+	}
 	articleService := article.NewService(postgresRepo)
 	htmlHandler := html.NewHandler(articleService, assetsPath)
 	restHandler := rest.NewHandler(articleService)
@@ -83,38 +86,4 @@ func parseArguments() {
 	flag.StringVar(&apiKey, "api-key", "", "API Key for the /api endpoints.")
 	flag.StringVar(&postgresConnStr, "postgres-connection-string", "", "Connection string for a postgres database.")
 	flag.Parse()
-}
-
-func initMockRepository() *repository.MockRepository {
-	mockRepo := repository.NewMockRepository()
-
-	sampleArticles := []article.Article{
-		{
-			ID:              1,
-			Title:           "Getting Started with Go",
-			Slug:            "getting-started-with-go",
-			Content:         "Go is a statically typed, compiled programming language designed at Google...",
-			Tags:            []string{"go", "programming", "beginner"},
-			PublicationDate: time.Now().AddDate(0, 0, -7),
-		},
-		{
-			ID:              2,
-			Title:           "Web Development with Go",
-			Slug:            "web-development-with-go",
-			Content:         "Go is an excellent choice for web development due to its simplicity and performance...",
-			Tags:            []string{"go", "web-development", "backend"},
-			PublicationDate: time.Now().AddDate(0, 0, -3),
-		},
-		{
-			ID:              3,
-			Title:           "Concurrency in Go",
-			Slug:            "concurrency-in-go",
-			Content:         "One of Go's standout features is its built-in support for concurrency...",
-			Tags:            []string{"go", "concurrency", "advanced"},
-			PublicationDate: time.Now().AddDate(0, 0, -1),
-		},
-	}
-
-	mockRepo.SetArticles(sampleArticles)
-	return mockRepo
 }
