@@ -10,7 +10,7 @@ import (
 )
 
 templ ArticleCard(a article.Article) {
-	<div class="border-4 border-[#1a1a1a] mb-8 p-4 bg-[#f5f5f5] shadow-lg hover:shadow-xl transition-shadow duration-300">
+	<div class="border-4 border-[#1a1a1a] rounded-lg mb-8 p-4 bg-[#f5f5f5] shadow-lg hover:shadow-xl transition-shadow duration-300">
 		<h2 class="text-4xl font-bold mb-4 uppercase text-[#1a1a1a]">{ a.Title }</h2>
 		<div class="mb-4 text-lg text-[#1a1a1a] prose">
 			@templ.Raw(truncateHTML(markdown.ToHTML([]byte(a.Content), parser.NewWithExtensions(parser.CommonExtensions),
@@ -26,7 +26,7 @@ templ ArticleCard(a article.Article) {
 		</div>
 		<a
 			href={ templ.SafeURL("/article/" + a.Slug) }
-			class="inline-block bg-[#1a1a1a] text-[#f5f5f5] font-bold py-2 px-4 hover:bg-[#FF0000] hover:text-[#f5f5f5] border-2 border-[#1a1a1a] hover:border-[#FF0000] transition-colors duration-200"
+			class="inline-block bg-[#1a1a1a] text-[#f5f5f5] font-bold py-2 px-4 hover:bg-[#FF0000] hover:text-[#f5f5f5] border-2 border-[#1a1a1a] hover:border-[#FF0000] transition-colors duration-200 rounded-md"
 		>
 			READ MORE
 		</a>

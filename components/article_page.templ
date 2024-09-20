@@ -9,7 +9,7 @@ import (
 templ ArticlePage(a article.Article, assetsPath string) {
 	@Page(a.Title, assetsPath) {
 		<div class="min-h-screen flex flex-col items-center">
-			<div class="w-full max-w-4xl bg-white border-4 border-[#1a1a1a] flex flex-col my-8">
+			<div class="w-full max-w-4xl bg-white border-4 border-[#1a1a1a] rounded-lg flex flex-col my-8">
 				@RedDoorHome(assetsPath)
 				<div class="flex-grow flex flex-col p-8">
 					<h1 class="text-6xl font-bold mb-6 uppercase text-[#1a1a1a] border-b-4 border-[#1a1a1a] pb-4">{ a.Title }</h1>
