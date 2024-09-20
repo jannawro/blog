@@ -2,17 +2,18 @@ package components
 
 import (
 	"github.com/gomarkdown/markdown"
-	"github.com/gomarkdown/markdown/parser"
 	"github.com/jannawro/blog/article"
 )
 
 templ ArticlePage(a article.Article, assetsPath string) {
 	@Page(a.Title, assetsPath) {
 		<div class="min-h-screen flex flex-col items-center">
-			<div class="w-full max-w-4xl bg-white border-4 border-[#1a1a1a] rounded-lg flex flex-col my-8">
+			<div class="w-full max-w-4xl bg-[#f5f5f5] border-4 border-[#1a1a1a] rounded-lg flex flex-col my-8">
 				@RedDoorHome(assetsPath)
 				<div class="flex-grow flex flex-col p-8">
-					<h1 class="text-6xl font-bold mb-6 uppercase text-[#1a1a1a] border-b-4 border-[#1a1a1a] pb-4">{ a.Title }</h1>
+					<h1 class="text-6xl font-bold mb-6 uppercase text-[#1a1a1a] border-b-4 border-[#1a1a1a] pb-4">
+						{ a.Title }
+					</h1>
 					<div class="mb-8">
 						<span class="text-2xl font-bold text-[#1a1a1a]">{ a.PublicationDate.Format("2006-01-02") }</span>
 						<div class="flex flex-wrap mt-4">
@@ -22,7 +23,7 @@ templ ArticlePage(a article.Article, assetsPath string) {
 						</div>
 					</div>
 					<div class="prose max-w-none text-[#1a1a1a] text-xl leading-relaxed">
-						@templ.Raw(string(markdown.ToHTML([]byte(a.Content), parser.NewWithExtensions(parser.CommonExtensions), nil)))
+						@templ.Raw(string(markdown.ToHTML([]byte(a.Content), nil, nil)))
 					</div>
 				</div>
 			</div>

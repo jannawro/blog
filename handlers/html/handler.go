@@ -1,15 +1,12 @@
 package html
 
 import (
-	"embed"
 	"errors"
 	"net/http"
 
 	a "github.com/jannawro/blog/article"
 	"github.com/jannawro/blog/components"
 )
-
-var assets embed.FS
 
 type Handler struct {
 	service    *a.Service
