@@ -5,12 +5,13 @@ import (
 	"database/sql"
 	"fmt"
 	"io/fs"
-	"os"
+	"log/slog"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/jannawro/blog/article"
+	"github.com/jannawro/blog/middleware"
 	_ "github.com/lib/pq"
 )
 
@@ -80,7 +81,7 @@ func (r *PostgresqlRepository) Create(ctx context.Context, article article.Artic
 	defer func() {
 		if err := tx.Rollback(); err != nil {
 			if err != sql.ErrTxDone {
-				fmt.Fprintf(os.Stderr, "Error rolling back transaction: %v\n", err)
+				slog.Error(fmt.Sprintf("Error rolling back transaction: %v", err), "requestID", middleware.ReqIDFromCtx(ctx))
 			}
 		}
 	}()
@@ -191,7 +192,7 @@ func (r *PostgresqlRepository) Update(
 	defer func() {
 		if err := tx.Rollback(); err != nil {
 			if err != sql.ErrTxDone {
-				fmt.Fprintf(os.Stderr, "Error rolling back transaction: %v\n", err)
+				slog.Error(fmt.Sprintf("Error rolling back transaction: %v", err), "requestID", middleware.ReqIDFromCtx(ctx))
 			}
 		}
 	}()
@@ -231,7 +232,7 @@ func (r *PostgresqlRepository) Delete(ctx context.Context, id int64) error {
 	defer func() {
 		if err := tx.Rollback(); err != nil {
 			if err != sql.ErrTxDone {
-				fmt.Fprintf(os.Stderr, "Error rolling back transaction: %v\n", err)
+				slog.Error(fmt.Sprintf("Error rolling back transaction: %v", err), "requestID", middleware.ReqIDFromCtx(ctx))
 			}
 		}
 	}()

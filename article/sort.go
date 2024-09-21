@@ -1,6 +1,7 @@
 package article
 
 import (
+	"net/http"
 	"sort"
 	"strings"
 )
@@ -28,4 +29,18 @@ func (a Articles) Sort(option SortOption) {
 			return false
 		}
 	})
+}
+
+func GetSortOption(r *http.Request) SortOption {
+	sortParam := r.URL.Query().Get("sort")
+	switch sortParam {
+	case "title":
+		return SortByTitle
+	case "id":
+		return SortByID
+	case "date":
+		fallthrough
+	default:
+		return SortByPublicationDate
+	}
 }

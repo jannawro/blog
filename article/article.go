@@ -12,11 +12,6 @@ const (
 	publicationDateFormat = "2006-01-02"
 )
 
-var (
-	ErrSeparatorNotFound = errors.New("separator between headers and body not found")
-	ErrInvalidDateFormat = errors.New("unable to parse date: invalid format")
-)
-
 // Article is a representation of a markdown file with specific headers. Example of such a file:
 // `title:Fondant recipe
 // publicationDate:2005-04-02
@@ -68,7 +63,7 @@ func UnmarshalToArticle(data []byte, a *Article) error {
 	a.Slug = strings.ReplaceAll(strings.ToLower(headers["title"]), " ", "-")
 	date, err := time.Parse(publicationDateFormat, headers["publicationDate"])
 	if err != nil {
-		return ErrInvalidDateFormat
+		return errors.Join(ErrDateFormatFailed, err)
 	}
 	a.PublicationDate = date
 	a.Tags = strings.Split(headers["tags"], ",")

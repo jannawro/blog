@@ -10,6 +10,7 @@ import (
 
 	"github.com/jannawro/blog/article"
 	"github.com/jannawro/blog/handlers/rest"
+	"github.com/jannawro/blog/middleware"
 	"github.com/jannawro/blog/repository"
 	"github.com/stretchr/testify/assert"
 )
@@ -36,6 +37,7 @@ func TestCreateArticle(t *testing.T) {
 	}
 
 	req, err := http.NewRequest("POST", "/articles", bytes.NewBuffer(articleData))
+	req = middleware.SetReqID(req)
 	assert.NoError(t, err)
 	req.Header.Set("Content-Type", "application/json")
 
@@ -72,6 +74,7 @@ func TestGetAllArticles(t *testing.T) {
 	})
 
 	req, err := http.NewRequest("GET", "/articles", nil)
+	req = middleware.SetReqID(req)
 	assert.NoError(t, err)
 
 	rr := httptest.NewRecorder()
@@ -94,6 +97,7 @@ func TestGetArticleByTitle(t *testing.T) {
 	mockRepo.SetArticles([]article.Article{expectedArticle})
 
 	req := httptest.NewRequest("GET", "/articles/test-article", nil)
+	req = middleware.SetReqID(req)
 	pathParam := "title"
 	req.SetPathValue(pathParam, "test-article")
 
@@ -116,6 +120,7 @@ func TestGetArticleByID(t *testing.T) {
 	mockRepo.SetArticles([]article.Article{expectedArticle})
 
 	req := httptest.NewRequest("GET", "/articles/1", nil)
+	req = middleware.SetReqID(req)
 	pathParam := "id"
 	req.SetPathValue(pathParam, "1")
 
@@ -142,6 +147,7 @@ func TestGetArticlesByTags(t *testing.T) {
 	mockRepo.SetArticles(articles)
 
 	req := httptest.NewRequest("GET", "/articles?tag=tag1&tag=tag2", nil)
+	req = middleware.SetReqID(req)
 
 	rr := httptest.NewRecorder()
 	handler.GetArticlesByTags().ServeHTTP(rr, req)
@@ -166,6 +172,7 @@ func TestUpdateArticleByTitle(t *testing.T) {
 	}`)
 
 	req := httptest.NewRequest("PUT", "/articles/original-title", bytes.NewBuffer(updatedData))
+	req = middleware.SetReqID(req)
 	pathParam := "title"
 	req.SetPathValue(pathParam, "original-title")
 	req.Header.Set("Content-Type", "application/json")
@@ -190,6 +197,7 @@ func TestDeleteArticleByTitle(t *testing.T) {
 	mockRepo.SetArticles([]article.Article{articleToDelete})
 
 	req := httptest.NewRequest("DELETE", "/articles/article-to-delete", nil)
+	req = middleware.SetReqID(req)
 	pathParam := "title"
 	req.SetPathValue(pathParam, "article-to-delete")
 
@@ -215,6 +223,7 @@ func TestGetAllTags(t *testing.T) {
 	mockRepo.SetArticles(articles)
 
 	req := httptest.NewRequest("GET", "/tags", nil)
+	req = middleware.SetReqID(req)
 
 	rr := httptest.NewRecorder()
 	handler.GetAllTags().ServeHTTP(rr, req)

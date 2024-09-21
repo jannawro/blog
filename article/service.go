@@ -2,12 +2,8 @@ package article
 
 import (
 	"context"
-	"database/sql"
 	"errors"
-	"fmt"
 )
-
-var ErrArticleNotFound = errors.New("article not found")
 
 type Service struct {
 	repo ArticleRepository
@@ -20,15 +16,19 @@ func NewService(repo ArticleRepository) *Service {
 func (s *Service) Create(ctx context.Context, articleData []byte) (*Article, error) {
 	var article Article
 	if err := UnmarshalToArticle(articleData, &article); err != nil {
-		return nil, err
+		return nil, errors.Join(ErrArticleUnmarshalingFailed, err)
 	}
-	return s.repo.Create(ctx, article)
+	a, err := s.repo.Create(ctx, article)
+	if err != nil {
+		return nil, errors.Join(ErrArticleCreationFailed, err)
+	}
+	return a, nil
 }
 
 func (s *Service) GetAll(ctx context.Context, sortBy *SortOption) (Articles, error) {
 	articles, err := s.repo.GetAll(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrFetchAllFailed, err)
 	}
 	if sortBy != nil {
 		articles.Sort(*sortBy)
@@ -39,10 +39,7 @@ func (s *Service) GetAll(ctx context.Context, sortBy *SortOption) (Articles, err
 func (s *Service) GetBySlug(ctx context.Context, slug string) (*Article, error) {
 	article, err := s.repo.GetBySlug(ctx, slug)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("%w: %v", ErrArticleNotFound, err)
-		}
-		return nil, err
+		return nil, errors.Join(ErrFetchBySlugFailed, err)
 	}
 	return article, nil
 }
@@ -50,10 +47,7 @@ func (s *Service) GetBySlug(ctx context.Context, slug string) (*Article, error) 
 func (s *Service) GetByID(ctx context.Context, id int64) (*Article, error) {
 	article, err := s.repo.GetByID(ctx, id)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("%w: %v", ErrArticleNotFound, err)
-		}
-		return nil, err
+		return nil, errors.Join(ErrArticleNotFound, err)
 	}
 	return article, nil
 }
@@ -65,7 +59,7 @@ func (s *Service) GetByTags(
 ) (Articles, error) {
 	articles, err := s.repo.GetByTags(ctx, tags)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrFetchByTagsFailed, err)
 	}
 	if sortBy != nil {
 		articles.Sort(*sortBy)
@@ -80,29 +74,41 @@ func (s *Service) UpdateBySlug(
 ) (*Article, error) {
 	existingArticle, err := s.repo.GetBySlug(ctx, slug)
 	if err != nil {
-		return nil, err
+		return nil, errors.Join(ErrFetchBySlugFailed, err)
 	}
 
 	var updatedArticle Article
 	if err := UnmarshalToArticle(updatedData, &updatedArticle); err != nil {
-		return nil, err
+		return nil, errors.Join(ErrArticleUnmarshalingFailed, err)
 	}
 
 	updatedArticle.ID = existingArticle.ID
-	return s.repo.Update(ctx, existingArticle.ID, updatedArticle)
+	a, err := s.repo.Update(ctx, existingArticle.ID, updatedArticle)
+	if err != nil {
+		return nil, errors.Join(ErrUpdateBySlugFailed, err)
+	}
+	return a, nil
 }
 
 func (s *Service) DeleteBySlug(ctx context.Context, slug string) error {
 	article, err := s.repo.GetBySlug(ctx, slug)
 	if err != nil {
-		return err
+		return errors.Join(ErrFetchBySlugFailed, err)
 	}
 	if article == nil {
-		return errors.New("article not found")
+		return ErrArticleNotFound
 	}
-	return s.repo.Delete(ctx, article.ID)
+	err = s.repo.Delete(ctx, article.ID)
+	if err != nil {
+		return errors.Join(ErrDeleteBySlugFailed, err)
+	}
+	return nil
 }
 
 func (s *Service) GetAllTags(ctx context.Context) ([]string, error) {
-	return s.repo.GetAllTags(ctx)
+	tags, err := s.repo.GetAllTags(ctx)
+	if err != nil {
+		return nil, errors.Join(ErrFetchAllTagsFailed, err)
+	}
+	return tags, nil
 }

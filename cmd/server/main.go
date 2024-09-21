@@ -2,8 +2,9 @@ package main
 
 import (
 	"flag"
-	"log"
+	"log/slog"
 	"net/http"
+	"os"
 
 	"github.com/jannawro/blog/article"
 	"github.com/jannawro/blog/handlers/assets"
@@ -25,13 +26,18 @@ const assetsPath = "/assets/"
 func main() {
 	parseArguments()
 
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}))
+	slog.SetDefault(logger)
+
 	postgresDatabase, err := repository.NewPostgresDatabase(postgresConnStr)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	postgresRepo, err := repository.NewPostgresqlRepository(postgresDatabase, migrations.Files())
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	articleService := article.NewService(postgresRepo)
 	htmlHandler := html.NewHandler(articleService, assetsPath)
@@ -43,7 +49,7 @@ func main() {
 	frontendRouter.Handle("GET /index", htmlHandler.ServeIndex())
 	frontendRouter.Handle("GET /article/{title}", htmlHandler.ServeArticle("title"))
 	frontendStack := middleware.CreateStack(
-		middleware.Logging,
+		middleware.Logging(),
 	)
 
 	apiRouter := http.NewServeMux()
@@ -56,7 +62,7 @@ func main() {
 	apiRouter.Handle("DELETE /api/articles/{title}", restHandler.DeleteArticleByTitle("title"))
 	apiRouter.Handle("GET /api/tags", restHandler.GetAllTags())
 	apiStack := middleware.CreateStack(
-		middleware.Logging,
+		middleware.Logging(),
 		middleware.APIKeyAuth(middleware.APIKeyConfig{
 			KeyName: "X-API-Key",
 			Keys: map[string]bool{
@@ -74,10 +80,10 @@ func main() {
 		Handler: mainRouter,
 	}
 
-	log.Println("Listening on", port)
+	slog.Info("Listening on " + port)
 	err = server.ListenAndServe()
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 }
 
