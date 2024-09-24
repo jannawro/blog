@@ -1,13 +1,27 @@
 version: "2"
 sql:
   - engine: "postgresql"
-    queries: "repository/sqlc/query.sql"
-    schema: "repository/sqlc/schema.sql"
+    queries: "repository/postgres/sqlc/query.sql"
+    schema: "repository/postgres/sqlc/schema.sql"
     gen:
       go:
-        package: "repository"
-        out: "repository"
+        package: "postgres"
+        out: "repository/postgres"
         sql_package: "database/sql"
         output_models_file_name: models_sqlc.go
         output_db_file_name: db_sqlc.go
         output_files_suffix: _sqlc
+  - engine: "mysql"
+    queries: "repository/mysql/sqlc/query.sql"
+    schema: "repository/mysql/sqlc/schema.sql"
+    gen:
+      go:
+        package: "mysql"
+        out: "repository/mysql"
+        sql_package: "database/sql"
+        output_models_file_name: models_sqlc.go
+        output_db_file_name: db_sqlc.go
+        output_files_suffix: _sqlc
+        overrides:
+          - column: "articles.id"
+            go_type: "int64"

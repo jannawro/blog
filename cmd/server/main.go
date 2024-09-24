@@ -11,8 +11,8 @@ import (
 	"github.com/jannawro/blog/handlers/html"
 	"github.com/jannawro/blog/handlers/rest"
 	"github.com/jannawro/blog/middleware"
-	"github.com/jannawro/blog/repository"
-	"github.com/jannawro/blog/repository/migrations"
+	"github.com/jannawro/blog/repository/postgres"
+	"github.com/jannawro/blog/repository/postgres/migrations"
 )
 
 var (
@@ -31,11 +31,11 @@ func main() {
 	}))
 	slog.SetDefault(logger)
 
-	postgresDatabase, err := repository.NewPostgresDatabase(postgresConnStr)
+	postgresDatabase, err := postgres.NewDatabase(postgresConnStr)
 	if err != nil {
 		panic(err)
 	}
-	postgresRepo, err := repository.NewPostgresqlRepository(postgresDatabase, migrations.Files())
+	postgresRepo, err := postgres.NewRepository(postgresDatabase, migrations.Files())
 	if err != nil {
 		panic(err)
 	}

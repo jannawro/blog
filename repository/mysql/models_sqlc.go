@@ -2,10 +2,11 @@
 // versions:
 //   sqlc v1.27.0
 
-package repository
+package mysql
 
 import (
 	"database/sql"
+	"encoding/json"
 	"time"
 )
 
@@ -14,7 +15,7 @@ type Article struct {
 	Title           string
 	Slug            string
 	Content         string
-	Tags            []string
+	Tags            json.RawMessage
 	PublicationDate time.Time
 	CreatedAt       sql.NullTime
 	UpdatedAt       sql.NullTime

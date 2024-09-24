@@ -9,11 +9,11 @@ import (
 	"github.com/stretchr/testify/require"
 
 	a "github.com/jannawro/blog/article"
-	"github.com/jannawro/blog/repository"
+	"github.com/jannawro/blog/repository/mock"
 )
 
-func setupTestService() (*a.Service, *repository.MockRepository) {
-	mockRepo := repository.NewMockRepository()
+func setupTestService() (*a.Service, *mock.Repository) {
+	mockRepo := mock.NewRepository()
 	articleService := a.NewService(mockRepo)
 	return articleService, mockRepo
 }

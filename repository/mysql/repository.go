@@ -1,27 +1,29 @@
-package repository
+package mysql
 
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"io/fs"
 	"log/slog"
+	"strconv"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/golang-migrate/migrate/v4/database/mysql"
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/jannawro/blog/article"
 	"github.com/jannawro/blog/middleware"
-	_ "github.com/lib/pq"
 )
 
-type PostgresqlRepository struct {
+type Repository struct {
 	db *sql.DB
 	q  *Queries
 }
 
-func NewPostgresDatabase(connString string) (*sql.DB, error) {
-	db, err := sql.Open("postgres", connString)
+func NewDatabase(connString string) (*sql.DB, error) {
+	db, err := sql.Open("mysql", connString)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database connection: %w", err)
 	}
@@ -34,20 +36,20 @@ func NewPostgresDatabase(connString string) (*sql.DB, error) {
 	return db, nil
 }
 
-func NewPostgresqlRepository(database *sql.DB, migrationFiles fs.FS) (*PostgresqlRepository, error) {
+func NewRepository(database *sql.DB, migrationFiles fs.FS) (*Repository, error) {
 	// Run migration
 	if err := runMigration(database, migrationFiles); err != nil {
 		database.Close()
 		return nil, fmt.Errorf("failed to run migration: %w", err)
 	}
-	return &PostgresqlRepository{
+	return &Repository{
 		db: database,
 		q:  New(database),
 	}, nil
 }
 
 func runMigration(db *sql.DB, migrationFiles fs.FS) error {
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	driver, err := mysql.WithInstance(db, &mysql.Config{})
 	if err != nil {
 		return fmt.Errorf("failed to create database driver: %w", err)
 	}
@@ -73,7 +75,7 @@ func runMigration(db *sql.DB, migrationFiles fs.FS) error {
 	return nil
 }
 
-func (r *PostgresqlRepository) Create(ctx context.Context, article article.Article) (*article.Article, error) {
+func (r *Repository) Create(ctx context.Context, article article.Article) (*article.Article, error) {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -87,26 +89,31 @@ func (r *PostgresqlRepository) Create(ctx context.Context, article article.Artic
 	}()
 
 	qtx := r.q.WithTx(tx)
-	id, err := qtx.CreateArticle(ctx, CreateArticleParams{
+	result, err := qtx.CreateArticle(ctx, CreateArticleParams{
 		Title:           article.Title,
 		Slug:            article.Slug,
 		Content:         article.Content,
-		Tags:            article.Tags,
+		Tags:            tagsToJSON(article.Tags),
 		PublicationDate: article.PublicationDate,
 	})
 	if err != nil {
 		return nil, err
 	}
-
-	article.ID = id
 	if err := tx.Commit(); err != nil {
 		return nil, err
 	}
 
+	id, err := result.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	article.ID = id
+
 	return &article, nil
 }
 
-func (r *PostgresqlRepository) GetAll(ctx context.Context) (article.Articles, error) {
+func (r *Repository) GetAll(ctx context.Context) (article.Articles, error) {
 	dbArticles, err := r.q.GetAllArticles(ctx)
 	if err != nil {
 		return nil, err
@@ -119,7 +126,7 @@ func (r *PostgresqlRepository) GetAll(ctx context.Context) (article.Articles, er
 			Title:           a.Title,
 			Slug:            a.Slug,
 			Content:         a.Content,
-			Tags:            a.Tags,
+			Tags:            jsonToTags(a.Tags),
 			PublicationDate: a.PublicationDate,
 		}
 	}
@@ -127,7 +134,7 @@ func (r *PostgresqlRepository) GetAll(ctx context.Context) (article.Articles, er
 	return articlesSlice, nil
 }
 
-func (r *PostgresqlRepository) GetByID(ctx context.Context, id int64) (*article.Article, error) {
+func (r *Repository) GetByID(ctx context.Context, id int64) (*article.Article, error) {
 	dbArticle, err := r.q.GetArticleByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -138,12 +145,12 @@ func (r *PostgresqlRepository) GetByID(ctx context.Context, id int64) (*article.
 		Title:           dbArticle.Title,
 		Slug:            dbArticle.Slug,
 		Content:         dbArticle.Content,
-		Tags:            dbArticle.Tags,
+		Tags:            jsonToTags(dbArticle.Tags),
 		PublicationDate: dbArticle.PublicationDate,
 	}, nil
 }
 
-func (r *PostgresqlRepository) GetBySlug(ctx context.Context, slug string) (*article.Article, error) {
+func (r *Repository) GetBySlug(ctx context.Context, slug string) (*article.Article, error) {
 	dbArticle, err := r.q.GetArticleBySlug(ctx, slug)
 	if err != nil {
 		return nil, err
@@ -154,13 +161,13 @@ func (r *PostgresqlRepository) GetBySlug(ctx context.Context, slug string) (*art
 		Title:           dbArticle.Title,
 		Slug:            dbArticle.Slug,
 		Content:         dbArticle.Content,
-		Tags:            dbArticle.Tags,
+		Tags:            jsonToTags(dbArticle.Tags),
 		PublicationDate: dbArticle.PublicationDate,
 	}, nil
 }
 
-func (r *PostgresqlRepository) GetByTags(ctx context.Context, tags []string) (article.Articles, error) {
-	dbArticles, err := r.q.GetArticlesByTags(ctx, tags)
+func (r *Repository) GetByTags(ctx context.Context, tags []string) (article.Articles, error) {
+	dbArticles, err := r.q.GetArticlesByTags(ctx, tagsToJSON(tags))
 	if err != nil {
 		return nil, err
 	}
@@ -172,7 +179,7 @@ func (r *PostgresqlRepository) GetByTags(ctx context.Context, tags []string) (ar
 			Title:           a.Title,
 			Slug:            a.Slug,
 			Content:         a.Content,
-			Tags:            a.Tags,
+			Tags:            jsonToTags(a.Tags),
 			PublicationDate: a.PublicationDate,
 		}
 	}
@@ -180,7 +187,7 @@ func (r *PostgresqlRepository) GetByTags(ctx context.Context, tags []string) (ar
 	return articlesSlice, nil
 }
 
-func (r *PostgresqlRepository) Update(
+func (r *Repository) Update(
 	ctx context.Context,
 	id int64,
 	updated article.Article,
@@ -198,12 +205,12 @@ func (r *PostgresqlRepository) Update(
 	}()
 
 	qtx := r.q.WithTx(tx)
-	dbArticle, err := qtx.UpdateArticleByID(ctx, UpdateArticleByIDParams{
+	id, err = qtx.UpdateArticleByID(ctx, UpdateArticleByIDParams{
 		ID:              id,
 		Title:           updated.Title,
 		Slug:            updated.Slug,
 		Content:         updated.Content,
-		Tags:            updated.Tags,
+		Tags:            tagsToJSON(updated.Tags),
 		PublicationDate: updated.PublicationDate,
 	})
 	if err != nil {
@@ -214,17 +221,22 @@ func (r *PostgresqlRepository) Update(
 		return nil, err
 	}
 
+	a, err := r.q.GetArticleByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
 	return &article.Article{
-		ID:              dbArticle.ID,
-		Title:           dbArticle.Title,
-		Slug:            dbArticle.Slug,
-		Content:         dbArticle.Content,
-		Tags:            dbArticle.Tags,
-		PublicationDate: dbArticle.PublicationDate,
+		ID:              a.ID,
+		Title:           a.Title,
+		Slug:            a.Slug,
+		Content:         a.Content,
+		Tags:            jsonToTags(a.Tags),
+		PublicationDate: a.PublicationDate,
 	}, nil
 }
 
-func (r *PostgresqlRepository) Delete(ctx context.Context, id int64) error {
+func (r *Repository) Delete(ctx context.Context, id int64) error {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -246,6 +258,31 @@ func (r *PostgresqlRepository) Delete(ctx context.Context, id int64) error {
 	return tx.Commit()
 }
 
-func (r *PostgresqlRepository) GetAllTags(ctx context.Context) ([]string, error) {
+func (r *Repository) GetAllTags(ctx context.Context) ([]string, error) {
 	return r.q.GetAllTags(ctx)
+}
+
+func tagsToJSON(tags []string) json.RawMessage {
+	jsonTags, err := json.Marshal(tags)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("tags to json: ", string(jsonTags))
+	return jsonTags
+}
+
+func jsonToTags(j json.RawMessage) []string {
+	unescaped, err := strconv.Unquote(string(j))
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("unescaped: ", unescaped)
+
+	var tags []string
+	err = json.Unmarshal([]byte(unescaped), &tags)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("json to tags: ", tags)
+	return tags
 }

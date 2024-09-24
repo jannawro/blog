@@ -38,10 +38,11 @@ tasks:
       - go generate ./...
     sources:
       - ./**/*.templ
-      - ./repository/sqlc/*.sql
+      - ./repository/mysql/sqlc/*.sql
+      - ./repository/mysql/postgres/*.sql
     generates:
       - ./**/*_templ.go
-      - ./repository/*_sqlc.go
+      - ./repository/**/*_sqlc.go
 
   lint:
     desc: Run lint

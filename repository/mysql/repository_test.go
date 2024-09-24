@@ -1,4 +1,4 @@
-package repository_test
+package mysql_test
 
 import (
 	"context"
@@ -6,56 +6,54 @@ import (
 	"testing"
 	"time"
 
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/jannawro/blog/article"
-	"github.com/jannawro/blog/repository"
-	"github.com/jannawro/blog/repository/migrations"
-	_ "github.com/lib/pq"
+	"github.com/jannawro/blog/repository/mysql"
+	"github.com/jannawro/blog/repository/mysql/migrations"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/modules/postgres"
+	mysqltest "github.com/testcontainers/testcontainers-go/modules/mysql"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
 func setupTestDatabase(t *testing.T) (*sql.DB, func()) {
 	ctx := context.Background()
 
-	dbName := "postgres"
-	dbUser := "postgres"
+	dbName := "mysql"
+	dbUser := "mysql"
 	dbPassword := "password"
 
-	postgresContainer, err := postgres.Run(ctx,
-		"docker.io/postgres:16-alpine",
-		postgres.WithDatabase(dbName),
-		postgres.WithUsername(dbUser),
-		postgres.WithPassword(dbPassword),
-		postgres.WithSQLDriver("postgres"),
+	mysqlContainer, err := mysqltest.Run(ctx,
+		"mysql:8.0.36",
+		mysqltest.WithDatabase(dbName),
+		mysqltest.WithUsername(dbUser),
+		mysqltest.WithPassword(dbPassword),
 		testcontainers.WithWaitStrategy(
-			wait.ForLog("database system is ready to accept connections").
-				WithOccurrence(2).
+			wait.ForLog("port: 3306  MySQL Community Server").
 				WithStartupTimeout(5*time.Second)),
 	)
 	assert.NoError(t, err)
 
-	connString, err := postgresContainer.ConnectionString(ctx, "sslmode=disable")
+	connString, err := mysqlContainer.ConnectionString(ctx, "multiStatements=true")
 	assert.NoError(t, err)
 
-	db, err := sql.Open("postgres", connString)
+	db, err := sql.Open("mysql", connString)
 	require.NoError(t, err)
 
 	cleanup := func() {
 		db.Close()
-		postgresContainer.Terminate(ctx)
+		mysqlContainer.Terminate(ctx)
 	}
 
 	return db, cleanup
 }
 
-func TestPostgresqlRepository(t *testing.T) {
+func TestRepository(t *testing.T) {
 	db, cleanup := setupTestDatabase(t)
 	defer cleanup()
 
-	repo, err := repository.NewPostgresqlRepository(db, migrations.Files())
+	repo, err := mysql.NewRepository(db, migrations.Files())
 	require.NoError(t, err)
 
 	ctx := context.Background()
@@ -123,5 +121,4 @@ func TestPostgresqlRepository(t *testing.T) {
 		_, err = repo.GetByID(ctx, article.ID)
 		assert.Error(t, err)
 	})
-
 }

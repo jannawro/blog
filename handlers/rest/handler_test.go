@@ -11,12 +11,12 @@ import (
 	"github.com/jannawro/blog/article"
 	"github.com/jannawro/blog/handlers/rest"
 	"github.com/jannawro/blog/middleware"
-	"github.com/jannawro/blog/repository"
+	"github.com/jannawro/blog/repository/mock"
 	"github.com/stretchr/testify/assert"
 )
 
-func setupTest() (*rest.Handler, *repository.MockRepository) {
-	mockRepo := repository.NewMockRepository()
+func setupTest() (*rest.Handler, *mock.Repository) {
+	mockRepo := mock.NewRepository()
 	service := article.NewService(mockRepo)
 	handler := rest.NewHandler(service)
 	return handler, mockRepo
