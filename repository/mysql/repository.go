@@ -271,13 +271,8 @@ func tagsToJSON(tags []string) json.RawMessage {
 }
 
 func jsonToTags(j json.RawMessage) []string {
-	unescaped, err := strconv.Unquote(string(j))
-	if err != nil {
-		panic(err)
-	}
-
 	var tags []string
-	err = json.Unmarshal([]byte(unescaped), &tags)
+	err := json.Unmarshal(j, &tags)
 	if err != nil {
 		panic(err)
 	}
