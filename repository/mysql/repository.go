@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/fs"
 	"log/slog"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/golang-migrate/migrate/v4"
@@ -258,7 +259,22 @@ func (r *Repository) Delete(ctx context.Context, id int64) error {
 }
 
 func (r *Repository) GetAllTags(ctx context.Context) ([]string, error) {
-	return r.q.GetAllTags(ctx)
+	tags, err := r.q.GetAllTags(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Clean up the tags
+	var cleanTags []string
+	for _, tag := range tags {
+		// Remove any leading or trailing whitespace and quotes
+		cleanTag := strings.Trim(tag, " \"\n")
+		if cleanTag != "" {
+			cleanTags = append(cleanTags, cleanTag)
+		}
+	}
+
+	return cleanTags, nil
 }
 
 func tagsToJSON(tags []string) json.RawMessage {
