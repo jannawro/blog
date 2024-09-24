@@ -267,7 +267,6 @@ func tagsToJSON(tags []string) json.RawMessage {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("tags to json: ", string(jsonTags))
 	return jsonTags
 }
 
@@ -276,13 +275,11 @@ func jsonToTags(j json.RawMessage) []string {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("unescaped: ", unescaped)
 
 	var tags []string
 	err = json.Unmarshal([]byte(unescaped), &tags)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("json to tags: ", tags)
 	return tags
 }
