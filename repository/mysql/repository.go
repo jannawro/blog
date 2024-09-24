@@ -267,10 +267,15 @@ func (r *Repository) GetAllTags(ctx context.Context) ([]string, error) {
 	// Clean up the tags
 	var cleanTags []string
 	for _, tag := range tags {
-		// Remove any leading or trailing whitespace and quotes
-		cleanTag := strings.Trim(tag, " \"\n")
-		if cleanTag != "" {
-			cleanTags = append(cleanTags, cleanTag)
+		// Remove any leading or trailing whitespace, quotes, and square brackets
+		cleanTag := strings.Trim(tag, " \"\n[]")
+		// Split the tag in case it contains multiple tags
+		splitTags := strings.Split(cleanTag, ",")
+		for _, t := range splitTags {
+			t = strings.TrimSpace(t)
+			if t != "" {
+				cleanTags = append(cleanTags, t)
+			}
 		}
 	}
 
