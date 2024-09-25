@@ -3,7 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"fmt"
+	"errors"
 	"io/fs"
 	"log/slog"
 
@@ -12,8 +12,11 @@ import (
 	"github.com/golang-migrate/migrate/v4/source/iofs"
 	"github.com/jannawro/blog/article"
 	"github.com/jannawro/blog/middleware"
+	"github.com/jannawro/blog/repository"
 	_ "github.com/lib/pq"
 )
+
+const DBDriver = "postgres"
 
 type Repository struct {
 	db *sql.DB
@@ -21,53 +24,59 @@ type Repository struct {
 }
 
 func NewDatabase(connString string) (*sql.DB, error) {
-	db, err := sql.Open("postgres", connString)
+	db, err := sql.Open(DBDriver, connString)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open database connection: %w", err)
+		return nil, errors.Join(repository.ErrDatabaseConnectionFailed, err)
 	}
 
 	if err := db.Ping(); err != nil {
-		db.Close()
-		return nil, fmt.Errorf("failed to ping database: %w", err)
+		closeErr := db.Close()
+		if closeErr != nil {
+			return nil, errors.Join(repository.ErrPingFailed, err, closeErr)
+		}
+		return nil, errors.Join(repository.ErrPingFailed, err)
 	}
 
 	return db, nil
 }
 
-func NewRepository(database *sql.DB, migrationFiles fs.FS) (*Repository, error) {
+func NewRepository(db *sql.DB, migrationFiles fs.FS) (*Repository, error) {
 	// Run migration
-	if err := runMigration(database, migrationFiles); err != nil {
-		database.Close()
-		return nil, fmt.Errorf("failed to run migration: %w", err)
+	if err := runMigration(db, migrationFiles); err != nil {
+		closeErr := db.Close()
+		if closeErr != nil {
+			return nil, errors.Join(repository.ErrMigrationFailed, err, closeErr)
+		}
+		return nil, errors.Join(repository.ErrMigrationFailed, err)
 	}
 	return &Repository{
-		db: database,
-		q:  New(database),
+		db: db,
+		q:  New(db),
 	}, nil
 }
 
 func runMigration(db *sql.DB, migrationFiles fs.FS) error {
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
-		return fmt.Errorf("failed to create database driver: %w", err)
+		return errors.Join(repository.ErrDriverCreationFailed, err)
 	}
 
 	// Create an embed source for the migration
 	embedSource, err := iofs.New(migrationFiles, ".")
 	if err != nil {
-		return fmt.Errorf("failed to create embed source: %w", err)
+		return errors.Join(repository.ErrEmbedFailed, err)
 	}
 
 	m, err := migrate.NewWithInstance(
 		"iofs", embedSource,
-		"postgres", driver)
+		DBDriver, driver)
 	if err != nil {
-		return fmt.Errorf("failed to create migrate instance: %w", err)
+		return errors.Join(repository.ErrMigrationInstanceFailed, err)
 	}
 
 	// Run the migration
 	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		return fmt.Errorf("failed to run migration: %w", err)
+		return errors.Join(repository.ErrMigrationRunFailed, err)
 	}
 
 	return nil
@@ -81,7 +90,7 @@ func (r *Repository) Create(ctx context.Context, article article.Article) (*arti
 	defer func() {
 		if err := tx.Rollback(); err != nil {
 			if err != sql.ErrTxDone {
-				slog.Error(fmt.Sprintf("Error rolling back transaction: %v", err), "requestID", middleware.ReqIDFromCtx(ctx))
+				slog.Error(errors.Join(repository.ErrTxRollbackFailed, err).Error(), "requestID", middleware.ReqIDFromCtx(ctx))
 			}
 		}
 	}()
@@ -192,7 +201,7 @@ func (r *Repository) Update(
 	defer func() {
 		if err := tx.Rollback(); err != nil {
 			if err != sql.ErrTxDone {
-				slog.Error(fmt.Sprintf("Error rolling back transaction: %v", err), "requestID", middleware.ReqIDFromCtx(ctx))
+				slog.Error(errors.Join(repository.ErrTxRollbackFailed, err).Error(), "requestID", middleware.ReqIDFromCtx(ctx))
 			}
 		}
 	}()
@@ -232,7 +241,7 @@ func (r *Repository) Delete(ctx context.Context, id int64) error {
 	defer func() {
 		if err := tx.Rollback(); err != nil {
 			if err != sql.ErrTxDone {
-				slog.Error(fmt.Sprintf("Error rolling back transaction: %v", err), "requestID", middleware.ReqIDFromCtx(ctx))
+				slog.Error(errors.Join(repository.ErrTxRollbackFailed, err).Error(), "requestID", middleware.ReqIDFromCtx(ctx))
 			}
 		}
 	}()

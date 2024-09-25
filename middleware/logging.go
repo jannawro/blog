@@ -8,7 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type contextKey struct{}
+type ContextKey struct{}
 
 type wrappedWriter struct {
 	http.ResponseWriter
@@ -42,8 +42,14 @@ func Logging() Middleware {
 	}
 }
 
+func SetReqID(r *http.Request) *http.Request {
+	requestID := uuid.New()
+	ctx := context.WithValue(r.Context(), ContextKey{}, requestID)
+	return r.WithContext(ctx)
+}
+
 func ReqIDFromCtx(ctx context.Context) uuid.UUID {
-	v := ctx.Value(contextKey{})
+	v := ctx.Value(ContextKey{})
 	if v == nil {
 		panic("uuid for request not found")
 	}
@@ -54,10 +60,4 @@ func ReqIDFromCtx(ctx context.Context) uuid.UUID {
 	default:
 		panic("uuid for request not found")
 	}
-}
-
-func SetReqID(r *http.Request) *http.Request {
-	requestID := uuid.New()
-	ctx := context.WithValue(r.Context(), contextKey{}, requestID)
-	return r.WithContext(ctx)
 }

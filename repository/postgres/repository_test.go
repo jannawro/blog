@@ -37,15 +37,17 @@ func setupTestDatabase(t *testing.T) (*sql.DB, func()) {
 	)
 	assert.NoError(t, err)
 
-	connString, err := postgresContainer.ConnectionString(ctx, "sslmode=disable", "parseTime=true")
+	connString, err := postgresContainer.ConnectionString(ctx, "sslmode=disable")
 	assert.NoError(t, err)
 
-	db, err := sql.Open("postgres", connString)
+	db, err := sql.Open(postgres.DBDriver, connString)
 	require.NoError(t, err)
 
 	cleanup := func() {
-		db.Close()
-		postgresContainer.Terminate(ctx)
+		err := db.Close()
+		assert.NoError(t, err)
+		err = postgresContainer.Terminate(ctx)
+		assert.NoError(t, err)
 	}
 
 	return db, cleanup

@@ -35,15 +35,17 @@ func setupTestDatabase(t *testing.T) (*sql.DB, func()) {
 	)
 	assert.NoError(t, err)
 
-	connString, err := mysqlContainer.ConnectionString(ctx, "multiStatements=true")
+	connString, err := mysqlContainer.ConnectionString(ctx, "multiStatements=true", "parseTime=true")
 	assert.NoError(t, err)
 
-	db, err := sql.Open("mysql", connString)
+	db, err := sql.Open(mysql.DBDriver, connString)
 	require.NoError(t, err)
 
 	cleanup := func() {
-		db.Close()
-		mysqlContainer.Terminate(ctx)
+		err := db.Close()
+		assert.NoError(t, err)
+		err = mysqlContainer.Terminate(ctx)
+		assert.NoError(t, err)
 	}
 
 	return db, cleanup
