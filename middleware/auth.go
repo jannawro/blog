@@ -12,12 +12,20 @@ type APIKeyConfig struct {
 func APIKeyAuth(config APIKeyConfig) Middleware {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			key := r.Header.Get(config.KeyName)
-			if key == "" || !config.Keys[key] {
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			} else {
+			if isValidAPIKey(r, config) {
 				next.ServeHTTP(w, r)
+			} else {
+				respondUnauthorized(w)
 			}
 		})
 	}
+}
+
+func isValidAPIKey(r *http.Request, config APIKeyConfig) bool {
+	key := r.Header.Get(config.KeyName)
+	return key != "" && config.Keys[key]
+}
+
+func respondUnauthorized(w http.ResponseWriter) {
+	http.Error(w, "Unauthorized", http.StatusUnauthorized)
 }
