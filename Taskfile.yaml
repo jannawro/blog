@@ -6,7 +6,8 @@ vars:
     sh: git rev-parse HEAD
   PORT: 8888
   API_KEY: "anapikey"
-  PG_CONN_STR: postgresql://postgres:mysecretpassword@localhost:5432/postgres?sslmode=disable
+  # DB_CONN_STR: postgresql://postgres:mysecretpassword@localhost:5432/postgres?sslmode=disable
+  DB_CONN_STR: '"root:your_password@tcp(127.0.0.1:3306)/blog?multiStatements=true&parseTime=true"'
   TEMPL_VERSION: v0.2.778
   SQLC_VERSION: v1.27.0
   GOLANGCILINT_VERSION: v1.60.3
@@ -66,7 +67,7 @@ tasks:
       - generate
       - test
     cmds:
-      - go run ./cmd/server/... --port {{.PORT}} --api-key {{.API_KEY}} --postgres-connection-string {{.PG_CONN_STR}}
+      - go run ./cmd/server/... --port {{.PORT}} --api-key {{.API_KEY}} --db-connection-string {{.DB_CONN_STR}}
 
   docker-build:
     desc: Build the blogserver container using docker

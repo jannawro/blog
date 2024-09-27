@@ -26,13 +26,13 @@ func (h *Handler) CreateArticle() http.Handler {
 		var articleData struct {
 			Article string `json:"article"`
 		}
-		slog.Debug("Creating article", "requestID", middleware.ReqIDFromCtx(r.Context()), "requestBody", r.Body)
 		if err := json.NewDecoder(r.Body).Decode(&articleData); err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
+		slog.Debug("Creating article", "requestID", middleware.ReqIDFromCtx(r.Context()), "articleDetails", articleData.Article)
 		article, err := h.service.Create(r.Context(), []byte(articleData.Article))
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))

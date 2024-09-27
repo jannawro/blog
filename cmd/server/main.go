@@ -11,14 +11,16 @@ import (
 	"github.com/jannawro/blog/handlers/html"
 	"github.com/jannawro/blog/handlers/rest"
 	"github.com/jannawro/blog/middleware"
-	"github.com/jannawro/blog/repository/postgres"
-	"github.com/jannawro/blog/repository/postgres/migrations"
+	"github.com/jannawro/blog/repository/mysql"
+	"github.com/jannawro/blog/repository/mysql/migrations"
+	// "github.com/jannawro/blog/repository/postgres"
+	// "github.com/jannawro/blog/repository/postgres/migrations"
 )
 
 var (
-	port            string
-	apiKey          string
-	postgresConnStr string
+	port      string
+	apiKey    string
+	dbConnStr string
 )
 
 const assetsPath = "/assets/"
@@ -31,15 +33,25 @@ func main() {
 	}))
 	slog.SetDefault(logger)
 
-	postgresDatabase, err := postgres.NewDatabase(postgresConnStr)
+	// postgresDatabase, err := postgres.NewDatabase(dbConnStr)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// postgresRepo, err := postgres.NewRepository(postgresDatabase, migrations.Files())
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	mysqlDatabase, err := mysql.NewDatabase(dbConnStr)
 	if err != nil {
 		panic(err)
 	}
-	postgresRepo, err := postgres.NewRepository(postgresDatabase, migrations.Files())
+	mysqlRepo, err := mysql.NewRepository(mysqlDatabase, migrations.Files())
 	if err != nil {
 		panic(err)
 	}
-	articleService := article.NewService(postgresRepo)
+
+	articleService := article.NewService(mysqlRepo)
 	htmlHandler := html.NewHandler(articleService, assetsPath)
 	restHandler := rest.NewHandler(articleService)
 
@@ -90,6 +102,6 @@ func main() {
 func parseArguments() {
 	flag.StringVar(&port, "port", "8888", "The port the server should listen on. The default is 8888.")
 	flag.StringVar(&apiKey, "api-key", "", "API Key for the /api endpoints.")
-	flag.StringVar(&postgresConnStr, "postgres-connection-string", "", "Connection string for a postgres database.")
+	flag.StringVar(&dbConnStr, "db-connection-string", "", "Connection string for a database.")
 	flag.Parse()
 }
