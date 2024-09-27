@@ -39,7 +39,6 @@ type ArticleRepository interface {
 	GetAllTags(ctx context.Context) ([]string, error)
 	Update(ctx context.Context, id int64, updated Article) (*Article, error)
 	Delete(ctx context.Context, id int64) error
-	ExistsByTitle(ctx context.Context, title string) (bool, error)
 }
 
 // UnmarshalToArticle parses a markdown file with specific headers and stores the result as an article in a

@@ -2,6 +2,7 @@ package rest
 
 import (
 	"encoding/json"
+	"errors"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -32,30 +33,36 @@ func (h *Handler) CreateArticle() http.Handler {
 			return
 		}
 
-		// Parse the article data to get the title
-		parsedArticle, err := a.ParseArticle([]byte(articleData.Article))
+		var unmarshaledArticle a.Article
+		err := a.UnmarshalToArticle([]byte(articleData.Article), &unmarshaledArticle)
 		if err != nil {
-			slog.Error("Failed to parse article", "requestID", middleware.ReqIDFromCtx(r.Context()), "error", err)
+			slog.Error("Failed to unmarshal article", "requestID", middleware.ReqIDFromCtx(r.Context()), "error", err)
 			http.Error(w, "Invalid article format", http.StatusBadRequest)
 			return
 		}
 
 		// Check if an article with the same title already exists
-		existingArticle, err := h.service.GetBySlug(r.Context(), a.Slugify(parsedArticle.Title))
+		_, err = h.service.GetBySlug(r.Context(), unmarshaledArticle.Slug)
 		if err == nil {
 			// Article with the same title already exists
-			slog.Info("Article with this title already exists", "requestID", middleware.ReqIDFromCtx(r.Context()), "title", parsedArticle.Title)
+			slog.Info("Article with this title already exists",
+				"requestID", middleware.ReqIDFromCtx(r.Context()),
+				"title", unmarshaledArticle.Title,
+			)
 			http.Error(w, "An article with this title already exists", http.StatusConflict)
 			return
-		} else if err != a.ErrArticleNotFound {
+		} else if !errors.Is(err, a.ErrArticleNotFound) {
 			// An unexpected error occurred
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
 
-		slog.Debug("Creating article", "requestID", middleware.ReqIDFromCtx(r.Context()), "articleDetails", articleData.Article)
-		article, err := h.service.Create(r.Context(), []byte(articleData.Article))
+		slog.Debug("Creating article",
+			"requestID", middleware.ReqIDFromCtx(r.Context()),
+			"articleDetails", articleData.Article,
+		)
+		createdArticle, err := h.service.Create(r.Context(), unmarshaledArticle)
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -63,7 +70,7 @@ func (h *Handler) CreateArticle() http.Handler {
 		}
 
 		w.WriteHeader(http.StatusCreated)
-		err = json.NewEncoder(w).Encode(article)
+		err = json.NewEncoder(w).Encode(createdArticle)
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -78,8 +85,13 @@ func (h *Handler) GetAllArticles() http.Handler {
 		slog.Debug("Fetching all articles", "requestID", middleware.ReqIDFromCtx(r.Context()), "sortOption", sortOption)
 		articles, err := h.service.GetAll(r.Context(), &sortOption)
 		if err != nil {
-			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			if errors.Is(err, a.ErrArticlesNotFound) {
+				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
+				http.Error(w, err.Error(), http.StatusNotFound)
+			} else {
+				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
 			return
 		}
 
@@ -98,7 +110,7 @@ func (h *Handler) GetArticleByTitle(slugPathParam string) http.Handler {
 		slog.Debug("Fetching article by slug", "requestID", middleware.ReqIDFromCtx(r.Context()), "slug", slug)
 		article, err := h.service.GetBySlug(r.Context(), slug)
 		if err != nil {
-			if err == a.ErrArticleNotFound {
+			if errors.Is(err, a.ErrArticleNotFound) {
 				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
 				http.Error(w, err.Error(), http.StatusNotFound)
 			} else {
@@ -130,7 +142,7 @@ func (h *Handler) GetArticleByID(idPathParam string) http.Handler {
 
 		article, err := h.service.GetByID(r.Context(), id)
 		if err != nil {
-			if err == a.ErrArticleNotFound {
+			if errors.Is(err, a.ErrArticleNotFound) {
 				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
 				http.Error(w, err.Error(), http.StatusNotFound)
 			} else {
@@ -159,8 +171,13 @@ func (h *Handler) GetArticlesByTags() http.Handler {
 		)
 		articles, err := h.service.GetByTags(r.Context(), tags, &sortOption)
 		if err != nil {
-			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			if errors.Is(err, a.ErrArticlesNotFound) {
+				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
+				http.Error(w, err.Error(), http.StatusNotFound)
+			} else {
+				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
 			return
 		}
 
@@ -175,23 +192,31 @@ func (h *Handler) GetArticlesByTags() http.Handler {
 func (h *Handler) UpdateArticleByTitle(slugPathParam string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		slug := r.PathValue(slugPathParam)
-		var updatedArticleDate struct {
+		var updatedArticleData struct {
 			Article string `json:"article"`
 		}
 
-		slog.Debug("Updating article", "requestID", middleware.ReqIDFromCtx(r.Context()),
-			"slug", slug,
-			"requestBody", r.Body,
-		)
-		if err := json.NewDecoder(r.Body).Decode(&updatedArticleDate); err != nil {
+		if err := json.NewDecoder(r.Body).Decode(&updatedArticleData); err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
+		slog.Debug("Updating article", "requestID", middleware.ReqIDFromCtx(r.Context()),
+			"slug", slug,
+			"articleDetails", updatedArticleData.Article,
+		)
 
-		article, err := h.service.UpdateBySlug(r.Context(), slug, []byte(updatedArticleDate.Article))
+		var unmarshaledArticle a.Article
+		err := a.UnmarshalToArticle([]byte(updatedArticleData.Article), &unmarshaledArticle)
 		if err != nil {
-			if err == a.ErrArticleNotFound {
+			slog.Error("Failed to unmarshal article", "requestID", middleware.ReqIDFromCtx(r.Context()), "error", err)
+			http.Error(w, "Invalid article format", http.StatusBadRequest)
+			return
+		}
+
+		updatedArticle, err := h.service.UpdateBySlug(r.Context(), slug, unmarshaledArticle)
+		if err != nil {
+			if errors.Is(err, a.ErrArticleNotFound) {
 				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
 				http.Error(w, err.Error(), http.StatusNotFound)
 			} else {
@@ -201,7 +226,7 @@ func (h *Handler) UpdateArticleByTitle(slugPathParam string) http.Handler {
 			return
 		}
 
-		err = json.NewEncoder(w).Encode(article)
+		err = json.NewEncoder(w).Encode(updatedArticle)
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -216,7 +241,7 @@ func (h *Handler) DeleteArticleByTitle(slugPathParam string) http.Handler {
 		slog.Debug("Deleting article", "requestID", middleware.ReqIDFromCtx(r.Context()), "slug", slug)
 		err := h.service.DeleteBySlug(r.Context(), slug)
 		if err != nil {
-			if err == a.ErrArticleNotFound {
+			if errors.Is(err, a.ErrArticleNotFound) {
 				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
 				http.Error(w, err.Error(), http.StatusNotFound)
 			} else {
@@ -246,43 +271,4 @@ func (h *Handler) GetAllTags() http.Handler {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
-}
-func ParseArticle(data []byte) (*Article, error) {
-	lines := strings.Split(string(data), "\n")
-	article := &Article{}
-	var content []string
-	inContent := false
-
-	for _, line := range lines {
-		if inContent {
-			content = append(content, line)
-		} else if strings.TrimSpace(line) == "===" {
-			inContent = true
-		} else {
-			parts := strings.SplitN(line, ":", 2)
-			if len(parts) != 2 {
-				continue
-			}
-			key := strings.TrimSpace(parts[0])
-			value := strings.TrimSpace(parts[1])
-
-			switch key {
-			case "title":
-				article.Title = value
-			case "publicationDate":
-				date, err := time.Parse("2006-01-02", value)
-				if err != nil {
-					return nil, fmt.Errorf("invalid date format: %v", err)
-				}
-				article.PublicationDate = date
-			case "tags":
-				article.Tags = strings.Split(value, ",")
-			}
-		}
-	}
-
-	article.Content = strings.TrimSpace(strings.Join(content, "\n"))
-	article.Slug = Slugify(article.Title)
-
-	return article, nil
 }
