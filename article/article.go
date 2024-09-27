@@ -60,7 +60,7 @@ func UnmarshalToArticle(data []byte, a *Article) error {
 	}
 
 	a.Title = headers["title"]
-	a.Slug = strings.ReplaceAll(strings.ToLower(headers["title"]), " ", "-")
+	a.Slug = Slugify(headers["title"])
 	date, err := time.Parse(publicationDateFormat, headers["publicationDate"])
 	if err != nil {
 		return errors.Join(ErrDateFormatFailed, err)
@@ -70,4 +70,8 @@ func UnmarshalToArticle(data []byte, a *Article) error {
 	a.Content = strings.TrimSpace(bodySection)
 
 	return nil
+}
+
+func Slugify(title string) string {
+	return strings.ReplaceAll(strings.ToLower(title), " ", "-")
 }

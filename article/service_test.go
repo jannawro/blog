@@ -22,47 +22,26 @@ func TestCreate(t *testing.T) {
 	service, _ := setupTestService()
 	ctx := context.Background()
 
-	tests := []struct {
-		name        string
-		input       []byte
-		expectedErr bool
-	}{
-		{
-			name: "Valid article",
-			input: []byte(`title:Test Article
-publicationDate:2023-05-10
-tags:test,article
-===
-This is the content of the test article.`),
-			expectedErr: false,
-		},
-		{
-			name:        "Invalid article (missing separator)",
-			input:       []byte("Title: Invalid Article\nTags: test\nThis is invalid content without separator."),
-			expectedErr: true,
-		},
+	testArticle := a.Article{
+		ID:              1,
+		Title:           "Article 1",
+		Slug:            "article-1",
+		Tags:            []string{"tag1", "tag2"},
+		Content:         "This is the content of the test article.",
+		PublicationDate: time.Date(2023, 5, 10, 0, 0, 0, 0, time.UTC),
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			article, err := service.Create(ctx, tt.input)
+	response, err := service.Create(ctx, testArticle)
+	assert.NoError(t, err)
 
-			if tt.expectedErr {
-				assert.Error(t, err)
-				assert.Nil(t, article)
-			} else {
-				assert.NoError(t, err)
-				require.NotNil(t, article)
-				assert.NotEmpty(t, article.ID)
-				assert.Equal(t, "Test Article", article.Title)
-				assert.Equal(t, "test-article", article.Slug)
-				assert.Equal(t, []string{"test", "article"}, article.Tags)
-				expectedDate, _ := time.Parse("2006-01-02", "2023-05-10")
-				assert.Equal(t, expectedDate, article.PublicationDate)
-				assert.Equal(t, "This is the content of the test article.", article.Content)
-			}
-		})
-	}
+	require.NotNil(t, response)
+	assert.NotEmpty(t, response.ID)
+	assert.Equal(t, "Article 1", response.Title)
+	assert.Equal(t, "article-1", response.Slug)
+	assert.Equal(t, []string{"tag1", "tag2"}, response.Tags)
+	assert.Equal(t, "This is the content of the test article.", response.Content)
+	expectedDate, _ := time.Parse("2006-01-02", "2023-05-10")
+	assert.Equal(t, expectedDate, response.PublicationDate)
 }
 
 func TestGetAllTags(t *testing.T) {
@@ -228,31 +207,39 @@ func TestUpdateByTitle(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		slug        string
-		updatedData []byte
+		initialSlug string
+		updated     a.Article
 		expectedErr bool
 	}{
 		{
-			name: "Update existing article",
-			slug: "initial-article",
-			updatedData: []byte(`title:Updated Article
-publicationDate:2023-05-10
-tags:updated,tag
-===
-Updated content`),
+			name:        "Update existing article",
+			initialSlug: "initial-article",
+			updated: a.Article{
+				Title:           "Updated Article",
+				Slug:            "updated-article",
+				Content:         "Updated content",
+				Tags:            []string{"updated", "tag"},
+				PublicationDate: time.Date(2023, time.May, 10, 0, 0, 0, 0, time.UTC),
+			},
 			expectedErr: false,
 		},
 		{
 			name:        "Update non-existing article",
-			slug:        "non-existing-article",
-			updatedData: []byte("Title: New Article\nTags: new, tag\nPublication Date: 2023-05-10\n\nNew content"),
+			initialSlug: "non-existing-article",
+			updated: a.Article{
+				Title:           "New Article",
+				Slug:            "new-article",
+				Content:         "New content",
+				Tags:            []string{"new", "tag"},
+				PublicationDate: time.Date(2023, time.May, 10, 0, 0, 0, 0, time.UTC),
+			},
 			expectedErr: true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			updatedArticle, err := service.UpdateBySlug(ctx, tt.slug, tt.updatedData)
+			updatedArticle, err := service.UpdateBySlug(ctx, tt.initialSlug, tt.updated)
 
 			if tt.expectedErr {
 				assert.Error(t, err)
