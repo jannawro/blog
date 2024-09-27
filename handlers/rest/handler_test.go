@@ -25,43 +25,62 @@ func setupTest() (*rest.Handler, *mock.Repository) {
 func TestCreateArticle(t *testing.T) {
 	handler, mockRepo := setupTest()
 
-	articleData := []byte(`{
-		"article": "title:Test Article\npublicationDate:2023-05-15\ntags:test,article\n===\nThis is a test article."
-	}`)
-	expectedArticle := &article.Article{
-		Title:           "Test Article",
-		Slug:            "test-article",
-		Content:         "This is a test article.",
-		Tags:            []string{"test", "article"},
-		PublicationDate: time.Date(2023, 5, 15, 0, 0, 0, 0, time.UTC),
-	}
+	t.Run("Create new article successfully", func(t *testing.T) {
+		articleData := []byte(`{
+			"article": "title:Test Article\npublicationDate:2023-05-15\ntags:test,article\n===\nThis is a test article."
+		}`)
+		expectedArticle := &article.Article{
+			Title:           "Test Article",
+			Slug:            "test-article",
+			Content:         "This is a test article.",
+			Tags:            []string{"test", "article"},
+			PublicationDate: time.Date(2023, 5, 15, 0, 0, 0, 0, time.UTC),
+		}
 
-	req, err := http.NewRequest("POST", "/articles", bytes.NewBuffer(articleData))
-	req = middleware.SetReqID(req)
-	assert.NoError(t, err)
-	req.Header.Set("Content-Type", "application/json")
+		req, err := http.NewRequest("POST", "/articles", bytes.NewBuffer(articleData))
+		req = middleware.SetReqID(req)
+		assert.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
 
-	rr := httptest.NewRecorder()
-	handler.CreateArticle().ServeHTTP(rr, req)
+		rr := httptest.NewRecorder()
+		handler.CreateArticle().ServeHTTP(rr, req)
 
-	assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, http.StatusCreated, rr.Code)
 
-	var response article.Article
-	err = json.Unmarshal(rr.Body.Bytes(), &response)
-	assert.NoError(t, err)
+		var response article.Article
+		err = json.Unmarshal(rr.Body.Bytes(), &response)
+		assert.NoError(t, err)
 
-	// Compare relevant fields
-	assert.Equal(t, expectedArticle.Title, response.Title)
-	assert.Equal(t, expectedArticle.Slug, response.Slug)
-	assert.Equal(t, expectedArticle.Content, response.Content)
-	assert.Equal(t, expectedArticle.Tags, response.Tags)
-	assert.Equal(t, expectedArticle.PublicationDate, response.PublicationDate)
+		// Compare relevant fields
+		assert.Equal(t, expectedArticle.Title, response.Title)
+		assert.Equal(t, expectedArticle.Slug, response.Slug)
+		assert.Equal(t, expectedArticle.Content, response.Content)
+		assert.Equal(t, expectedArticle.Tags, response.Tags)
+		assert.Equal(t, expectedArticle.PublicationDate, response.PublicationDate)
 
-	// Verify the article was added to the mock repository
-	articles, err := mockRepo.GetAll(req.Context())
-	assert.NoError(t, err)
-	assert.Len(t, articles, 1)
-	assert.Equal(t, expectedArticle.Title, articles[0].Title)
+		// Verify the article was added to the mock repository
+		articles, err := mockRepo.GetAll(req.Context())
+		assert.NoError(t, err)
+		assert.Len(t, articles, 1)
+		assert.Equal(t, expectedArticle.Title, articles[0].Title)
+	})
+
+	t.Run("Attempt to create duplicate article", func(t *testing.T) {
+		articleData := []byte(`{
+			"article": "title:Test Article\npublicationDate:2023-05-15\ntags:test,article\n===\nThis is a duplicate article."
+		}`)
+
+		req, err := http.NewRequest("POST", "/articles", bytes.NewBuffer(articleData))
+		req = middleware.SetReqID(req)
+		assert.NoError(t, err)
+		req.Header.Set("Content-Type", "application/json")
+
+		rr := httptest.NewRecorder()
+		handler.CreateArticle().ServeHTTP(rr, req)
+
+		assert.Equal(t, http.StatusConflict, rr.Code)
+		assert.Contains(t, rr.Body.String(), "An article with this title already exists")
+	})
 }
 
 func TestGetAllArticles(t *testing.T) {

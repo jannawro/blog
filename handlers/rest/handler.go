@@ -32,6 +32,28 @@ func (h *Handler) CreateArticle() http.Handler {
 			return
 		}
 
+		// Parse the article data to get the title
+		parsedArticle, err := a.ParseArticle([]byte(articleData.Article))
+		if err != nil {
+			slog.Error("Failed to parse article", "requestID", middleware.ReqIDFromCtx(r.Context()), "error", err)
+			http.Error(w, "Invalid article format", http.StatusBadRequest)
+			return
+		}
+
+		// Check if an article with the same title already exists
+		existingArticle, err := h.service.GetBySlug(r.Context(), a.Slugify(parsedArticle.Title))
+		if err == nil {
+			// Article with the same title already exists
+			slog.Info("Article with this title already exists", "requestID", middleware.ReqIDFromCtx(r.Context()), "title", parsedArticle.Title)
+			http.Error(w, "An article with this title already exists", http.StatusConflict)
+			return
+		} else if err != a.ErrArticleNotFound {
+			// An unexpected error occurred
+			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			return
+		}
+
 		slog.Debug("Creating article", "requestID", middleware.ReqIDFromCtx(r.Context()), "articleDetails", articleData.Article)
 		article, err := h.service.Create(r.Context(), []byte(articleData.Article))
 		if err != nil {
@@ -40,6 +62,7 @@ func (h *Handler) CreateArticle() http.Handler {
 			return
 		}
 
+		w.WriteHeader(http.StatusCreated)
 		err = json.NewEncoder(w).Encode(article)
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
@@ -223,4 +246,43 @@ func (h *Handler) GetAllTags() http.Handler {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
+}
+func ParseArticle(data []byte) (*Article, error) {
+	lines := strings.Split(string(data), "\n")
+	article := &Article{}
+	var content []string
+	inContent := false
+
+	for _, line := range lines {
+		if inContent {
+			content = append(content, line)
+		} else if strings.TrimSpace(line) == "===" {
+			inContent = true
+		} else {
+			parts := strings.SplitN(line, ":", 2)
+			if len(parts) != 2 {
+				continue
+			}
+			key := strings.TrimSpace(parts[0])
+			value := strings.TrimSpace(parts[1])
+
+			switch key {
+			case "title":
+				article.Title = value
+			case "publicationDate":
+				date, err := time.Parse("2006-01-02", value)
+				if err != nil {
+					return nil, fmt.Errorf("invalid date format: %v", err)
+				}
+				article.PublicationDate = date
+			case "tags":
+				article.Tags = strings.Split(value, ",")
+			}
+		}
+	}
+
+	article.Content = strings.TrimSpace(strings.Join(content, "\n"))
+	article.Slug = Slugify(article.Title)
+
+	return article, nil
 }
