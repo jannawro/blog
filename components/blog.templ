@@ -16,6 +16,7 @@ templ Blog(articles []article.Article, assetsPath string) {
 					A <span class="text-[#FF0000]">red</span> door is the threshold
 					between the real and the imaginary. The perfect place to put what I think and do. So I do.
 				</p>
+				@SocialMediaIcons()
 			</div>
 			<div class="flex flex-wrap -mx-4">
 				<div class="w-full md:w-1/2 px-4">
@@ -28,6 +29,7 @@ templ Blog(articles []article.Article, assetsPath string) {
 							A <span class="text-[#FF0000]">red</span> door is the threshold
 							between the real and the imaginary. The perfect place to put what I think and do. So I do.
 						</p>
+						@SocialMediaIcons()
 					</div>
 					for i, article := range articles {
 						if i % 2 == 1 {
