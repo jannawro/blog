@@ -13,6 +13,8 @@ services:
       - API_KEY=an_api_key
       - DATABASE_URL=postgres://postgres:password@db:5432/postgres?sslmode=disable
       - LOG_LEVEL=debug
+    networks:
+      - blog_network
 
   db:
     image: postgres:latest
@@ -27,6 +29,12 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - blog_network
 
 volumes:
   postgres_data:
+
+networks:
+  blog_network:
+    driver: bridge
