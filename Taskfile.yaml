@@ -1,14 +1,6 @@
 version: "3"
 
 vars:
-  NAME: blogserver
-  TAG:
-    sh: git rev-parse HEAD
-  PORT: 8888
-  API_KEY: "anapikey"
-  DB_CONN_STR: postgresql://postgres:mysecretpassword@localhost:5432/postgres?sslmode=disable
-  # DB_CONN_STR: '"root:your_password@tcp(127.0.0.1:3306)/blog?multiStatements=true&parseTime=true"'
-  LOG_LEVEL: debug
   TEMPL_VERSION: v0.2.778
   SQLC_VERSION: v1.27.0
   GOLANGCILINT_VERSION: v1.60.3
@@ -59,28 +51,11 @@ tasks:
       - go test ./...
     deps:
       - assets
-      # - lint
-
-  run:
-    desc: Run the app as a local server
-    deps:
-      - assets
-      - generate
-      - test
-    cmds:
-      - go run ./cmd/server/... --port {{.PORT}} --api-key {{.API_KEY}} --db-connection-string {{.DB_CONN_STR}} --log-level {{.LOG_LEVEL}}
-
-  docker-build:
-    desc: Build the blogserver container using docker
-    deps:
-      - test
-    cmds:
-      - docker build . -t {{.NAME}}:{{.TAG}}
 
   docker-run:
     desc: Run the blogserver container using docker
     deps:
-      - docker-build
+      - test
     cmds:
-      - docker run -p {{.PORT}} {{.NAME}}:{{.TAG}} --port {{.PORT}} --api-key {{.API_KEY}} --db-connection-string {{.DB_CONN_STR}} --log-level {{.LOG_LEVEL}}
+      - docker compose up
 

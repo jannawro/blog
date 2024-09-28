@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for a-red-door-blog on 2024-09-28T13:42:34+02:00
+# fly.toml app configuration file generated for a-red-door-blog on 2024-09-28T17:25:04+02:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -6,7 +6,9 @@
 app = 'a-red-door-blog'
 primary_region = 'waw'
 
-[build]
+[env]
+  LOG_LEVEL = 'info'
+  PORT = '8080'
 
 [http_service]
   internal_port = 8080
@@ -18,7 +20,3 @@ primary_region = 'waw'
 
 [[vm]]
   size = 'shared-cpu-1x'
-
-[env]
-  PORT = "8080"
-  LOG_LEVEL = "info"
