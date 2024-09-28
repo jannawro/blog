@@ -3,19 +3,14 @@ FROM node:alpine AS build-css
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY . .
 
 RUN npm install
 
-COPY tailwind.config.js ./
-COPY tailwind.css ./
-COPY **/*.templ ./
-
-RUN mkdir static
 RUN npx tailwindcss -i ./tailwind.css -o ./styles.css
 
 # Build a binary
-FROM golang:1.22 AS build-app
+FROM golang:1.23 AS build-app
 
 WORKDIR /app
 
@@ -40,4 +35,5 @@ FROM scratch
 
 COPY --from=build-app /app/blogserver /blogserver
 
-CMD ["/blogserver"]
+ENTRYPOINT [ "/blogserver" ]
+CMD []

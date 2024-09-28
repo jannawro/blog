@@ -39,3 +39,4 @@ handlers/assets/*.css
 
 # misc
 TODO.md
+.env

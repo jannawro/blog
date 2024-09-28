@@ -5,22 +5,22 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/jannawro/blog/article"
 	"github.com/jannawro/blog/handlers/assets"
 	"github.com/jannawro/blog/handlers/html"
 	"github.com/jannawro/blog/handlers/rest"
 	"github.com/jannawro/blog/middleware"
-	"github.com/jannawro/blog/repository/mysql"
-	"github.com/jannawro/blog/repository/mysql/migrations"
-	// "github.com/jannawro/blog/repository/postgres"
-	// "github.com/jannawro/blog/repository/postgres/migrations"
+	"github.com/jannawro/blog/repository/postgres"
+	"github.com/jannawro/blog/repository/postgres/migrations"
 )
 
 var (
 	port      string
 	apiKey    string
 	dbConnStr string
+	logLevel  string
 )
 
 const assetsPath = "/assets/"
@@ -29,29 +29,20 @@ func main() {
 	parseArguments()
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-		Level: slog.LevelDebug,
+		Level: parseLogLevel(logLevel),
 	}))
 	slog.SetDefault(logger)
 
-	// postgresDatabase, err := postgres.NewDatabase(dbConnStr)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// postgresRepo, err := postgres.NewRepository(postgresDatabase, migrations.Files())
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	mysqlDatabase, err := mysql.NewDatabase(dbConnStr)
+	postgresDatabase, err := postgres.NewDatabase(dbConnStr)
 	if err != nil {
 		panic(err)
 	}
-	mysqlRepo, err := mysql.NewRepository(mysqlDatabase, migrations.Files())
+	postgresRepo, err := postgres.NewRepository(postgresDatabase, migrations.Files())
 	if err != nil {
 		panic(err)
 	}
 
-	articleService := article.NewService(mysqlRepo)
+	articleService := article.NewService(postgresRepo)
 	htmlHandler := html.NewHandler(articleService, assetsPath)
 	restHandler := rest.NewHandler(articleService)
 
@@ -100,8 +91,24 @@ func main() {
 }
 
 func parseArguments() {
-	flag.StringVar(&port, "port", "8888", "The port the server should listen on. The default is 8888.")
-	flag.StringVar(&apiKey, "api-key", "", "API Key for the /api endpoints.")
-	flag.StringVar(&dbConnStr, "db-connection-string", "", "Connection string for a database.")
+	flag.StringVar(&port, "port", os.Getenv("PORT"), "The port the server should listen on. The default is 8888.")
+	flag.StringVar(&apiKey, "api-key", os.Getenv("API_KEY"), "API Key for the /api endpoints.")
+	flag.StringVar(&dbConnStr, "db-connection-string", os.Getenv("DATABASE_URL"), "Connection string for a database.")
+	flag.StringVar(&logLevel, "log-level", os.Getenv("LOG_LEVEL"), "Set the log level (debug, info, warn, error)")
 	flag.Parse()
+}
+
+func parseLogLevel(level string) slog.Level {
+	switch strings.ToLower(level) {
+	case "debug":
+		return slog.LevelDebug
+	case "info":
+		return slog.LevelInfo
+	case "warn":
+		return slog.LevelWarn
+	case "error":
+		return slog.LevelError
+	default:
+		return slog.LevelInfo
+	}
 }
