@@ -57,5 +57,5 @@ tasks:
     deps:
       - test
     cmds:
-      - docker compose up
+      - docker compose up --build
 

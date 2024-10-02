@@ -12,6 +12,8 @@ import (
 	"github.com/jannawro/blog/middleware"
 )
 
+const internalServerErrorMsg = "Internal server error"
+
 type Handler struct {
 	service *a.Service
 }
@@ -29,7 +31,7 @@ func (h *Handler) CreateArticle() http.Handler {
 		}
 		if err := json.NewDecoder(r.Body).Decode(&articleData); err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, internalServerErrorMsg, http.StatusBadRequest)
 			return
 		}
 
@@ -54,7 +56,7 @@ func (h *Handler) CreateArticle() http.Handler {
 		} else if !errors.Is(err, a.ErrArticleNotFound) {
 			// An unexpected error occurred
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
+			http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
 			return
 		}
 
@@ -65,7 +67,7 @@ func (h *Handler) CreateArticle() http.Handler {
 		createdArticle, err := h.service.Create(r.Context(), unmarshaledArticle)
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
 			return
 		}
 
@@ -73,7 +75,7 @@ func (h *Handler) CreateArticle() http.Handler {
 		err = json.NewEncoder(w).Encode(createdArticle)
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
 		}
 	})
 }
@@ -87,10 +89,10 @@ func (h *Handler) GetAllArticles() http.Handler {
 		if err != nil {
 			if errors.Is(err, a.ErrArticlesNotFound) {
 				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-				http.Error(w, err.Error(), http.StatusNotFound)
+				http.Error(w, a.ErrArticleNotFound.Error(), http.StatusNotFound)
 			} else {
 				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
 			}
 			return
 		}
@@ -98,7 +100,7 @@ func (h *Handler) GetAllArticles() http.Handler {
 		err = json.NewEncoder(w).Encode(articles)
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
 		}
 	})
 }
@@ -112,10 +114,10 @@ func (h *Handler) GetArticleByTitle(slugPathParam string) http.Handler {
 		if err != nil {
 			if errors.Is(err, a.ErrArticleNotFound) {
 				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-				http.Error(w, err.Error(), http.StatusNotFound)
+				http.Error(w, a.ErrArticleNotFound.Error(), http.StatusNotFound)
 			} else {
 				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
 			}
 			return
 		}
@@ -123,7 +125,7 @@ func (h *Handler) GetArticleByTitle(slugPathParam string) http.Handler {
 		err = json.NewEncoder(w).Encode(article)
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
 		}
 	})
 }
@@ -144,10 +146,10 @@ func (h *Handler) GetArticleByID(idPathParam string) http.Handler {
 		if err != nil {
 			if errors.Is(err, a.ErrArticleNotFound) {
 				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-				http.Error(w, err.Error(), http.StatusNotFound)
+				http.Error(w, a.ErrArticleNotFound.Error(), http.StatusNotFound)
 			} else {
 				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
 			}
 			return
 		}
@@ -155,7 +157,7 @@ func (h *Handler) GetArticleByID(idPathParam string) http.Handler {
 		err = json.NewEncoder(w).Encode(article)
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
 		}
 	})
 }
@@ -173,10 +175,10 @@ func (h *Handler) GetArticlesByTags() http.Handler {
 		if err != nil {
 			if errors.Is(err, a.ErrArticlesNotFound) {
 				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-				http.Error(w, err.Error(), http.StatusNotFound)
+				http.Error(w, a.ErrArticleNotFound.Error(), http.StatusNotFound)
 			} else {
 				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
 			}
 			return
 		}
@@ -184,7 +186,7 @@ func (h *Handler) GetArticlesByTags() http.Handler {
 		err = json.NewEncoder(w).Encode(articles)
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
 		}
 	})
 }
@@ -198,7 +200,7 @@ func (h *Handler) UpdateArticleByTitle(slugPathParam string) http.Handler {
 
 		if err := json.NewDecoder(r.Body).Decode(&updatedArticleData); err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, internalServerErrorMsg, http.StatusBadRequest)
 			return
 		}
 		slog.Debug("Updating article", "requestID", middleware.ReqIDFromCtx(r.Context()),
@@ -218,10 +220,10 @@ func (h *Handler) UpdateArticleByTitle(slugPathParam string) http.Handler {
 		if err != nil {
 			if errors.Is(err, a.ErrArticleNotFound) {
 				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-				http.Error(w, err.Error(), http.StatusNotFound)
+				http.Error(w, a.ErrArticleNotFound.Error(), http.StatusNotFound)
 			} else {
 				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
 			}
 			return
 		}
@@ -229,7 +231,7 @@ func (h *Handler) UpdateArticleByTitle(slugPathParam string) http.Handler {
 		err = json.NewEncoder(w).Encode(updatedArticle)
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
 		}
 	})
 }
@@ -243,10 +245,10 @@ func (h *Handler) DeleteArticleByTitle(slugPathParam string) http.Handler {
 		if err != nil {
 			if errors.Is(err, a.ErrArticleNotFound) {
 				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-				http.Error(w, err.Error(), http.StatusNotFound)
+				http.Error(w, a.ErrArticleNotFound.Error(), http.StatusNotFound)
 			} else {
 				slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
 			}
 			return
 		}
@@ -261,14 +263,14 @@ func (h *Handler) GetAllTags() http.Handler {
 		tags, err := h.service.GetAllTags(r.Context())
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
 			return
 		}
 
 		err = json.NewEncoder(w).Encode(tags)
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
 		}
 	})
 }

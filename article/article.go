@@ -20,12 +20,12 @@ const (
 // # Markdown Title
 // Markdown contents...`
 type Article struct {
-	ID              int64
-	Title           string
-	Slug            string
-	Content         string
-	Tags            []string
-	PublicationDate time.Time
+	ID              int64     `json:"id"`
+	Title           string    `json:"title"`
+	Slug            string    `json:"slug"`
+	Content         string    `json:"content"`
+	Tags            []string  `json:"tags"`
+	PublicationDate time.Time `json:"publication_date"`
 }
 
 type Articles []Article
