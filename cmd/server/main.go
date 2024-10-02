@@ -17,10 +17,10 @@ import (
 )
 
 var (
-	port      string
-	apiKey    string
-	dbConnStr string
-	logLevel  string
+	port        string
+	apiKey      string
+	databaseURL string
+	logLevel    string
 )
 
 const assetsPath = "/assets/"
@@ -33,7 +33,7 @@ func main() {
 	}))
 	slog.SetDefault(logger)
 
-	postgresDatabase, err := postgres.NewDatabase(dbConnStr)
+	postgresDatabase, err := postgres.NewDatabase(databaseURL)
 	if err != nil {
 		panic(err)
 	}
@@ -93,7 +93,11 @@ func main() {
 func parseArguments() {
 	flag.StringVar(&port, "port", os.Getenv("PORT"), "The port the server should listen on. The default is 8888.")
 	flag.StringVar(&apiKey, "api-key", os.Getenv("API_KEY"), "API Key for the /api endpoints.")
-	flag.StringVar(&dbConnStr, "db-connection-string", os.Getenv("DATABASE_URL"), "Connection string for a database.")
+	flag.StringVar(&databaseURL,
+		"database-url",
+		os.Getenv("DATABASE_URL"),
+		"Database URL. Should be a connection string containing auth credentials and configuration.",
+	)
 	flag.StringVar(&logLevel, "log-level", os.Getenv("LOG_LEVEL"), "Set the log level (debug, info, warn, error)")
 	flag.Parse()
 }

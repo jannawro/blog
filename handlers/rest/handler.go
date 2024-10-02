@@ -76,6 +76,7 @@ func (h *Handler) CreateArticle() http.Handler {
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
 			http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
+			return
 		}
 	})
 }
@@ -101,6 +102,7 @@ func (h *Handler) GetAllArticles() http.Handler {
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
 			http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
+			return
 		}
 	})
 }
@@ -126,6 +128,7 @@ func (h *Handler) GetArticleByTitle(slugPathParam string) http.Handler {
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
 			http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
+			return
 		}
 	})
 }
@@ -158,6 +161,7 @@ func (h *Handler) GetArticleByID(idPathParam string) http.Handler {
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
 			http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
+			return
 		}
 	})
 }
@@ -187,6 +191,7 @@ func (h *Handler) GetArticlesByTags() http.Handler {
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
 			http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
+			return
 		}
 	})
 }
@@ -232,6 +237,7 @@ func (h *Handler) UpdateArticleByTitle(slugPathParam string) http.Handler {
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
 			http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
+			return
 		}
 	})
 }
@@ -271,6 +277,7 @@ func (h *Handler) GetAllTags() http.Handler {
 		if err != nil {
 			slog.Error(err.Error(), "requestID", middleware.ReqIDFromCtx(r.Context()))
 			http.Error(w, internalServerErrorMsg, http.StatusInternalServerError)
+			return
 		}
 	})
 }
