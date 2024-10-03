@@ -46,8 +46,10 @@ func main() {
 	htmlHandler := html.NewHandler(articleService, assetsPath)
 	restHandler := rest.NewHandler(articleService)
 
+	assetsRouter := http.NewServeMux()
+	assetsRouter.Handle("GET "+assetsPath, assets.Serve(assetsPath))
+
 	frontendRouter := http.NewServeMux()
-	frontendRouter.Handle("GET "+assetsPath, assets.Serve(assetsPath))
 	frontendRouter.Handle("GET /", htmlHandler.ServeBlog())
 	frontendRouter.Handle("GET /index", htmlHandler.ServeIndex())
 	frontendRouter.Handle("GET /article/{title}", htmlHandler.ServeArticle("title"))
@@ -76,6 +78,7 @@ func main() {
 
 	mainRouter := http.NewServeMux()
 	mainRouter.Handle("/", frontendStack(frontendRouter))
+	mainRouter.Handle(assetsPath, assetsRouter)
 	mainRouter.Handle("/api/", apiStack(apiRouter))
 
 	server := http.Server{
