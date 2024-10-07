@@ -7,9 +7,6 @@
     @apply text-2xl font-bold leading-tight mb-2;
   }
 
-  h3::first-word {
-    text-transform: uppercase;
-  }
 
   h3::first-letter {
     @apply text-7xl font-bold float-left;
