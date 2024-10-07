@@ -1,3 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  h3::first-letter {
+    @apply float-left text-7xl font-bold;
+    line-height: 0.8;
+    margin-right: 0.1em;
+    margin-top: -0.1em;
+  }
+
+  h3 {
+    @apply text-base leading-relaxed;
+  }
+
+  aside {
+    @apply bg-gray-100 p-4 rounded-lg shadow-md;
+  }
+}
