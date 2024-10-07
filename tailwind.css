@@ -7,6 +7,10 @@
     @apply text-2xl font-bold leading-tight mb-2;
   }
 
+  h3::first-line {
+    text-transform: capitalize;
+  }
+
   h3::first-letter {
     @apply text-7xl font-bold float-left;
     line-height: 0.7;
