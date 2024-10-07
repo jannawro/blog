@@ -8,8 +8,10 @@
   }
 
   h3::first-letter {
-    @apply text-5xl font-bold;
-    margin-right: 0.05em;
+    @apply text-7xl font-bold float-left;
+    line-height: 0.8;
+    margin-right: 0.1em;
+    margin-top: -0.1em;
   }
 
   aside {
