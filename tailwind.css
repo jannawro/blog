@@ -4,11 +4,11 @@
 
 @layer base {
   h3 {
-    @apply text-2xl font-bold leading-tight mb-2;
+    @apply text-2xl font-bold leading-tight mb-2 max-w-prose text-left;
   }
 
   h3::first-letter {
-    @apply text-7xl font-bold float-left;
+    @apply text-8xl font-bold float-left;
     line-height: 0.7;
     margin-right: 0.0em;
     margin-top: 0.05em;
@@ -27,6 +27,10 @@
      content: '';
      @apply absolute top-0 left-0 w-full h-full bg-yellow-100 -z-10;
      transform: rotate(-2deg);
+   }
+
+   p {
+     @apply max-w-prose text-justify text-pretty;
    }
 
    p + aside {
