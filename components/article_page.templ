@@ -3,6 +3,7 @@ package components
 import (
 	"github.com/gomarkdown/markdown"
 	"github.com/jannawro/blog/article"
+	"github.com/gomarkdown/markdown/parser"
 )
 
 templ ArticlePage(a article.Article, assetsPath string) {
@@ -23,7 +24,7 @@ templ ArticlePage(a article.Article, assetsPath string) {
 						</div>
 					</div>
 					<div class="prose max-w-none text-[#1a1a1a] text-xl leading-relaxed">
-						@templ.Raw(string(markdown.ToHTML([]byte(a.Content), nil, nil)))
+						@templ.Raw(string(markdown.ToHTML([]byte(a.Content), parser.NewWithExtensions(extensions), nil)))
 					</div>
 				</div>
 			</div>
