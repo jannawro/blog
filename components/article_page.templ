@@ -24,7 +24,7 @@ templ ArticlePage(a article.Article, assetsPath string) {
 						</div>
 					</div>
 					<div class="prose max-w-none mx-auto text-[#1a1a1a] text-xl leading-relaxed text-justify" style="--content-width: 74ch;">
-						<div class="max-w-[var(--content-width)] mx-auto">
+						<div class="max-w-[var(--content-width)] mx-auto" style="max-width: 74ch; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word;">
 							@templ.Raw(string(markdown.ToHTML([]byte(a.Content), parser.NewWithExtensions(extensions), nil)))
 						</div>
 					</div>
