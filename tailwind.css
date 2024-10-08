@@ -16,14 +16,14 @@
   }
 
   .content-wrapper {
-    @apply flex flex-wrap items-start;
+    @apply flex items-start;
   }
 
   .content-wrapper > p {
-    @apply flex-1 min-w-0;
+    @apply w-2/3 min-w-0;
   }
 
-  aside {
-    @apply bg-gray-100 p-4 rounded-lg shadow-md ml-4 w-1/3;
+  .content-wrapper > aside {
+    @apply bg-gray-100 p-4 rounded-lg shadow-md w-1/3;
   }
 }
