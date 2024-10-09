@@ -11,9 +11,11 @@ import (
 templ ArticleCard(a article.Article) {
 	<div class="border-4 border-[#1a1a1a] rounded-lg mb-8 p-4 bg-[#f5f5f5] shadow-lg hover:shadow-xl transition-shadow duration-300">
 		<h2 class="text-4xl font-bold mb-4 uppercase text-[#1a1a1a]">{ a.Title }</h2>
-		<div class="mb-6 text-lg text-[#1a1a1a] prose bg-white p-4 rounded-md shadow-md border-l-4 border-[#FF0000] transition-all duration-300 hover:shadow-lg hover:border-l-8">
-			@templ.Raw(string(markdown.ToHTML([]byte(a.Thumbnail), parser.NewWithExtensions(extensions), nil)))
-		</div>
+		<a href={ templ.SafeURL("/article/" + a.Slug) } class="block mb-6">
+			<div class="text-lg text-[#1a1a1a] prose bg-white p-4 rounded-md shadow-md border-l-4 border-[#FF0000] transition-all duration-300 hover:shadow-lg hover:border-l-8">
+				@templ.Raw(string(markdown.ToHTML([]byte(a.Thumbnail), parser.NewWithExtensions(extensions), nil)))
+			</div>
+		</a>
 		<div class="mb-4">
 			<span class="text-lg font-bold mr-4 text-[#1a1a1a]">{ a.PublicationDate.Format("2006-01-02") }</span>
 			<div class="flex flex-wrap">
