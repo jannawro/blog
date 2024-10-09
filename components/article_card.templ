@@ -26,7 +26,9 @@ templ ArticleCard(a article.Article) {
 			href={ templ.SafeURL("/article/" + a.Slug) }
 			class="inline-block bg-[#1a1a1a] text-[#f5f5f5] font-bold py-2 px-4 rounded-md relative overflow-hidden group"
 		>
-			<span class="relative z-10 inline-block pl-3 transition-transform duration-300 ease-in-out group-hover:translate-x-1">READ MORE</span>
+			<div class="relative z-10 pl-3 transition-all duration-300 ease-in-out transform group-hover:translate-x-1">
+				<span class="inline-block">READ MORE</span>
+			</div>
 			<div class="absolute inset-y-0 left-0 w-1 bg-[#FF0000] transition-all duration-300 ease-in-out group-hover:w-2"></div>
 		</a>
 	</div>
