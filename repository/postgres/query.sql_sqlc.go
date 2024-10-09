@@ -13,13 +13,14 @@ import (
 )
 
 const createArticle = `-- name: CreateArticle :one
-INSERT INTO articles (title, slug, content, tags, publication_date)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO articles (title, thumbnail, slug, content, tags, publication_date)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING id
 `
 
 type CreateArticleParams struct {
 	Title           string
+	Thumbnail       string
 	Slug            string
 	Content         string
 	Tags            []string
@@ -29,6 +30,7 @@ type CreateArticleParams struct {
 func (q *Queries) CreateArticle(ctx context.Context, arg CreateArticleParams) (int64, error) {
 	row := q.db.QueryRowContext(ctx, createArticle,
 		arg.Title,
+		arg.Thumbnail,
 		arg.Slug,
 		arg.Content,
 		pq.Array(arg.Tags),
@@ -42,12 +44,13 @@ func (q *Queries) CreateArticle(ctx context.Context, arg CreateArticleParams) (i
 const deleteArticleByID = `-- name: DeleteArticleByID :one
 DELETE FROM articles
 WHERE id = $1
-RETURNING id, title, slug, content, tags, publication_date
+RETURNING id, title, thumbnail, slug, content, tags, publication_date
 `
 
 type DeleteArticleByIDRow struct {
 	ID              int64
 	Title           string
+	Thumbnail       string
 	Slug            string
 	Content         string
 	Tags            []string
@@ -60,6 +63,7 @@ func (q *Queries) DeleteArticleByID(ctx context.Context, id int64) (DeleteArticl
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
+		&i.Thumbnail,
 		&i.Slug,
 		&i.Content,
 		pq.Array(&i.Tags),
@@ -69,7 +73,7 @@ func (q *Queries) DeleteArticleByID(ctx context.Context, id int64) (DeleteArticl
 }
 
 const getAllArticles = `-- name: GetAllArticles :many
-SELECT id, title, slug, content, tags, publication_date, created_at, updated_at FROM articles
+SELECT id, title, thumbnail, slug, content, tags, publication_date, created_at, updated_at FROM articles
 `
 
 func (q *Queries) GetAllArticles(ctx context.Context) ([]Article, error) {
@@ -84,6 +88,7 @@ func (q *Queries) GetAllArticles(ctx context.Context) ([]Article, error) {
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
+			&i.Thumbnail,
 			&i.Slug,
 			&i.Content,
 			pq.Array(&i.Tags),
@@ -135,7 +140,7 @@ func (q *Queries) GetAllTags(ctx context.Context) ([]string, error) {
 }
 
 const getArticleByID = `-- name: GetArticleByID :one
-SELECT id, title, slug, content, tags, publication_date, created_at, updated_at FROM articles
+SELECT id, title, thumbnail, slug, content, tags, publication_date, created_at, updated_at FROM articles
 WHERE id = $1 LIMIT 1
 `
 
@@ -145,6 +150,7 @@ func (q *Queries) GetArticleByID(ctx context.Context, id int64) (Article, error)
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
+		&i.Thumbnail,
 		&i.Slug,
 		&i.Content,
 		pq.Array(&i.Tags),
@@ -156,7 +162,7 @@ func (q *Queries) GetArticleByID(ctx context.Context, id int64) (Article, error)
 }
 
 const getArticleBySlug = `-- name: GetArticleBySlug :one
-SELECT id, title, slug, content, tags, publication_date, created_at, updated_at FROM articles
+SELECT id, title, thumbnail, slug, content, tags, publication_date, created_at, updated_at FROM articles
 WHERE slug = $1 LIMIT 1
 `
 
@@ -166,6 +172,7 @@ func (q *Queries) GetArticleBySlug(ctx context.Context, slug string) (Article, e
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
+		&i.Thumbnail,
 		&i.Slug,
 		&i.Content,
 		pq.Array(&i.Tags),
@@ -177,7 +184,7 @@ func (q *Queries) GetArticleBySlug(ctx context.Context, slug string) (Article, e
 }
 
 const getArticlesByTags = `-- name: GetArticlesByTags :many
-SELECT id, title, slug, content, tags, publication_date, created_at, updated_at FROM articles
+SELECT id, title, thumbnail, slug, content, tags, publication_date, created_at, updated_at FROM articles
 WHERE tags && $1::text[]
 `
 
@@ -193,6 +200,7 @@ func (q *Queries) GetArticlesByTags(ctx context.Context, tags []string) ([]Artic
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
+			&i.Thumbnail,
 			&i.Slug,
 			&i.Content,
 			pq.Array(&i.Tags),
@@ -216,16 +224,18 @@ func (q *Queries) GetArticlesByTags(ctx context.Context, tags []string) ([]Artic
 const updateArticleByID = `-- name: UpdateArticleByID :one
 UPDATE articles
 SET title = $1,
-    slug = $2,
-    content = $3,
-    tags = $4,
-    publication_date = $5
-WHERE id = $6
-RETURNING id, title, slug, content, tags, publication_date
+    thumbnail = $2,
+    slug = $3,
+    content = $4,
+    tags = $5,
+    publication_date = $6
+WHERE id = $7
+RETURNING id, title, thumbnail, slug, content, tags, publication_date
 `
 
 type UpdateArticleByIDParams struct {
 	Title           string
+	Thumbnail       string
 	Slug            string
 	Content         string
 	Tags            []string
@@ -236,6 +246,7 @@ type UpdateArticleByIDParams struct {
 type UpdateArticleByIDRow struct {
 	ID              int64
 	Title           string
+	Thumbnail       string
 	Slug            string
 	Content         string
 	Tags            []string
@@ -245,6 +256,7 @@ type UpdateArticleByIDRow struct {
 func (q *Queries) UpdateArticleByID(ctx context.Context, arg UpdateArticleByIDParams) (UpdateArticleByIDRow, error) {
 	row := q.db.QueryRowContext(ctx, updateArticleByID,
 		arg.Title,
+		arg.Thumbnail,
 		arg.Slug,
 		arg.Content,
 		pq.Array(arg.Tags),
@@ -255,6 +267,7 @@ func (q *Queries) UpdateArticleByID(ctx context.Context, arg UpdateArticleByIDPa
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
+		&i.Thumbnail,
 		&i.Slug,
 		&i.Content,
 		pq.Array(&i.Tags),

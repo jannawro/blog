@@ -1,6 +1,7 @@
 CREATE TABLE articles (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
+    thumbnail TEXT NOT NULL,
     slug VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     tags JSON,

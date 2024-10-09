@@ -22,6 +22,7 @@ const (
 type Article struct {
 	ID              int64     `json:"id"`
 	Title           string    `json:"title"`
+	Thumbnail       string    `json:"thumbnail"`
 	Slug            string    `json:"slug"`
 	Content         string    `json:"content"`
 	Tags            []string  `json:"tags"`
@@ -60,6 +61,7 @@ func UnmarshalToArticle(data []byte, a *Article) error {
 	}
 
 	a.Title = headers["title"]
+	a.Thumbnail = headers["thumbnail"]
 	a.Slug = Slugify(headers["title"])
 	date, err := time.Parse(publicationDateFormat, headers["publicationDate"])
 	if err != nil {

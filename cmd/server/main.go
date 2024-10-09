@@ -1,11 +1,16 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"flag"
 	"log/slog"
 	"net/http"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/jannawro/blog/article"
 	"github.com/jannawro/blog/handlers/assets"
@@ -37,6 +42,13 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	defer func() {
+		err = postgresDatabase.Close()
+		if err != nil {
+			slog.Error("Encountered an unexptected error when closing the database connection", "error", err)
+			panic(err)
+		}
+	}()
 	postgresRepo, err := postgres.NewRepository(postgresDatabase, migrations.Files())
 	if err != nil {
 		panic(err)
@@ -86,9 +98,25 @@ func main() {
 		Handler: mainRouter,
 	}
 
-	slog.Info("Listening on " + port)
-	err = server.ListenAndServe()
-	if err != nil {
+	go func() {
+		slog.Info("Listening on " + port)
+		err = server.ListenAndServe()
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			slog.Error("Encountered an unexpected error when running the server", "error", err)
+			panic(err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	<-quit
+	slog.Info("Shutting down the server gracefully...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		slog.Error("Encountered an unexpected error when shutting down server gracefully", "error", err)
 		panic(err)
 	}
 }

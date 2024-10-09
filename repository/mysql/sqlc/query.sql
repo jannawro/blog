@@ -1,6 +1,6 @@
 -- name: CreateArticle :execresult
-INSERT INTO articles (title, slug, content, tags, publication_date)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO articles (title, thumbnail, slug, content, tags, publication_date)
+VALUES (?, ?, ?, ?, ?, ?);
 
 -- name: GetAllArticles :many
 SELECT * FROM articles;
@@ -30,6 +30,7 @@ ORDER BY unique_tag ASC;
 -- name: UpdateArticleByID :execrows
 UPDATE articles
 SET title = ?,
+    thumbnail = ?,
     slug = ?,
     content = ?,
     tags = ?,
@@ -40,7 +41,7 @@ WHERE id = ?;
 DELETE FROM articles
 WHERE id = ?;
 
-SELECT id, title, slug, content, tags, publication_date
+SELECT id, title, thumbnail, slug, content, tags, publication_date
 FROM articles
 WHERE id = ?;
 

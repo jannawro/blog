@@ -1,6 +1,7 @@
 CREATE TABLE articles (
     id BIGSERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
+    thumbnail TEXT NOT NULL,
     slug VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     tags TEXT[],

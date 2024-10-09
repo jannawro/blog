@@ -65,6 +65,7 @@ func TestRepository(t *testing.T) {
 	t.Run("Create and GetByID", func(t *testing.T) {
 		article := article.Article{
 			Title:           "Test Article",
+			Thumbnail:       "Test article thumbnail",
 			Slug:            "test-article",
 			Content:         "This is a test article",
 			Tags:            []string{"test", "golang"},

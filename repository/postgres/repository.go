@@ -98,6 +98,7 @@ func (r *Repository) Create(ctx context.Context, article article.Article) (*arti
 	qtx := r.q.WithTx(tx)
 	id, err := qtx.CreateArticle(ctx, CreateArticleParams{
 		Title:           article.Title,
+		Thumbnail:       article.Thumbnail,
 		Slug:            article.Slug,
 		Content:         article.Content,
 		Tags:            article.Tags,
@@ -126,6 +127,7 @@ func (r *Repository) GetAll(ctx context.Context) (article.Articles, error) {
 		articlesSlice[i] = article.Article{
 			ID:              a.ID,
 			Title:           a.Title,
+			Thumbnail:       a.Thumbnail,
 			Slug:            a.Slug,
 			Content:         a.Content,
 			Tags:            a.Tags,
@@ -145,6 +147,7 @@ func (r *Repository) GetByID(ctx context.Context, id int64) (*article.Article, e
 	return &article.Article{
 		ID:              dbArticle.ID,
 		Title:           dbArticle.Title,
+		Thumbnail:       dbArticle.Thumbnail,
 		Slug:            dbArticle.Slug,
 		Content:         dbArticle.Content,
 		Tags:            dbArticle.Tags,
@@ -161,6 +164,7 @@ func (r *Repository) GetBySlug(ctx context.Context, slug string) (*article.Artic
 	return &article.Article{
 		ID:              dbArticle.ID,
 		Title:           dbArticle.Title,
+		Thumbnail:       dbArticle.Thumbnail,
 		Slug:            dbArticle.Slug,
 		Content:         dbArticle.Content,
 		Tags:            dbArticle.Tags,
@@ -179,6 +183,7 @@ func (r *Repository) GetByTags(ctx context.Context, tags []string) (article.Arti
 		articlesSlice[i] = article.Article{
 			ID:              a.ID,
 			Title:           a.Title,
+			Thumbnail:       a.Thumbnail,
 			Slug:            a.Slug,
 			Content:         a.Content,
 			Tags:            a.Tags,
@@ -210,6 +215,7 @@ func (r *Repository) Update(
 	dbArticle, err := qtx.UpdateArticleByID(ctx, UpdateArticleByIDParams{
 		ID:              id,
 		Title:           updated.Title,
+		Thumbnail:       updated.Thumbnail,
 		Slug:            updated.Slug,
 		Content:         updated.Content,
 		Tags:            updated.Tags,
@@ -226,6 +232,7 @@ func (r *Repository) Update(
 	return &article.Article{
 		ID:              dbArticle.ID,
 		Title:           dbArticle.Title,
+		Thumbnail:       dbArticle.Thumbnail,
 		Slug:            dbArticle.Slug,
 		Content:         dbArticle.Content,
 		Tags:            dbArticle.Tags,

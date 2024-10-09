@@ -9,6 +9,7 @@ import (
 )
 
 var article = []byte(`title:Fondant recipe
+thumbnail:This is why my fondant recipe is great.
 publicationDate:2005-04-02
 tags:cooking,sweets
 ===
@@ -25,6 +26,7 @@ func TestUnmarshalToArticle(t *testing.T) {
 	assert := assert.New(t)
 
 	assert.Equal("Fondant recipe", a.Title)
+	assert.Equal("This is why my fondant recipe is great.", a.Thumbnail)
 	assert.Equal("fondant-recipe", a.Slug)
 
 	assert.Equal([]string{"cooking", "sweets"}, a.Tags)

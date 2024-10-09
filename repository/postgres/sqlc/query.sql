@@ -1,6 +1,6 @@
 -- name: CreateArticle :one
-INSERT INTO articles (title, slug, content, tags, publication_date)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO articles (title, thumbnail, slug, content, tags, publication_date)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING id;
 
 -- name: GetAllArticles :many
@@ -27,14 +27,15 @@ ORDER BY unique_tag ASC;
 -- name: UpdateArticleByID :one
 UPDATE articles
 SET title = $1,
-    slug = $2,
-    content = $3,
-    tags = $4,
-    publication_date = $5
-WHERE id = $6
-RETURNING id, title, slug, content, tags, publication_date;
+    thumbnail = $2,
+    slug = $3,
+    content = $4,
+    tags = $5,
+    publication_date = $6
+WHERE id = $7
+RETURNING id, title, thumbnail, slug, content, tags, publication_date;
 
 -- name: DeleteArticleByID :one
 DELETE FROM articles
 WHERE id = $1
-RETURNING id, title, slug, content, tags, publication_date;
+RETURNING id, title, thumbnail, slug, content, tags, publication_date;

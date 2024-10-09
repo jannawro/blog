@@ -13,12 +13,13 @@ import (
 )
 
 const createArticle = `-- name: CreateArticle :execresult
-INSERT INTO articles (title, slug, content, tags, publication_date)
-VALUES (?, ?, ?, ?, ?)
+INSERT INTO articles (title, thumbnail, slug, content, tags, publication_date)
+VALUES (?, ?, ?, ?, ?, ?)
 `
 
 type CreateArticleParams struct {
 	Title           string
+	Thumbnail       string
 	Slug            string
 	Content         string
 	Tags            json.RawMessage
@@ -28,6 +29,7 @@ type CreateArticleParams struct {
 func (q *Queries) CreateArticle(ctx context.Context, arg CreateArticleParams) (sql.Result, error) {
 	return q.db.ExecContext(ctx, createArticle,
 		arg.Title,
+		arg.Thumbnail,
 		arg.Slug,
 		arg.Content,
 		arg.Tags,
@@ -49,7 +51,7 @@ func (q *Queries) DeleteArticleByID(ctx context.Context, id int64) (int64, error
 }
 
 const getAllArticles = `-- name: GetAllArticles :many
-SELECT id, title, slug, content, tags, publication_date, created_at, updated_at FROM articles
+SELECT id, title, thumbnail, slug, content, tags, publication_date, created_at, updated_at FROM articles
 `
 
 func (q *Queries) GetAllArticles(ctx context.Context) ([]Article, error) {
@@ -64,6 +66,7 @@ func (q *Queries) GetAllArticles(ctx context.Context) ([]Article, error) {
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
+			&i.Thumbnail,
 			&i.Slug,
 			&i.Content,
 			&i.Tags,
@@ -119,7 +122,7 @@ func (q *Queries) GetAllTags(ctx context.Context) ([]string, error) {
 }
 
 const getArticleByID = `-- name: GetArticleByID :one
-SELECT id, title, slug, content, tags, publication_date, created_at, updated_at FROM articles
+SELECT id, title, thumbnail, slug, content, tags, publication_date, created_at, updated_at FROM articles
 WHERE id = ? LIMIT 1
 `
 
@@ -129,6 +132,7 @@ func (q *Queries) GetArticleByID(ctx context.Context, id int64) (Article, error)
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
+		&i.Thumbnail,
 		&i.Slug,
 		&i.Content,
 		&i.Tags,
@@ -140,7 +144,7 @@ func (q *Queries) GetArticleByID(ctx context.Context, id int64) (Article, error)
 }
 
 const getArticleBySlug = `-- name: GetArticleBySlug :one
-SELECT id, title, slug, content, tags, publication_date, created_at, updated_at FROM articles
+SELECT id, title, thumbnail, slug, content, tags, publication_date, created_at, updated_at FROM articles
 WHERE slug = ? LIMIT 1
 `
 
@@ -150,6 +154,7 @@ func (q *Queries) GetArticleBySlug(ctx context.Context, slug string) (Article, e
 	err := row.Scan(
 		&i.ID,
 		&i.Title,
+		&i.Thumbnail,
 		&i.Slug,
 		&i.Content,
 		&i.Tags,
@@ -161,7 +166,7 @@ func (q *Queries) GetArticleBySlug(ctx context.Context, slug string) (Article, e
 }
 
 const getArticlesByTags = `-- name: GetArticlesByTags :many
-SELECT id, title, slug, content, tags, publication_date, created_at, updated_at FROM articles
+SELECT id, title, thumbnail, slug, content, tags, publication_date, created_at, updated_at FROM articles
 WHERE JSON_OVERLAPS(tags, CAST(? AS JSON))
 `
 
@@ -177,6 +182,7 @@ func (q *Queries) GetArticlesByTags(ctx context.Context, tags json.RawMessage) (
 		if err := rows.Scan(
 			&i.ID,
 			&i.Title,
+			&i.Thumbnail,
 			&i.Slug,
 			&i.Content,
 			&i.Tags,
@@ -200,6 +206,7 @@ func (q *Queries) GetArticlesByTags(ctx context.Context, tags json.RawMessage) (
 const updateArticleByID = `-- name: UpdateArticleByID :execrows
 UPDATE articles
 SET title = ?,
+    thumbnail = ?,
     slug = ?,
     content = ?,
     tags = ?,
@@ -209,6 +216,7 @@ WHERE id = ?
 
 type UpdateArticleByIDParams struct {
 	Title           string
+	Thumbnail       string
 	Slug            string
 	Content         string
 	Tags            json.RawMessage
@@ -219,6 +227,7 @@ type UpdateArticleByIDParams struct {
 func (q *Queries) UpdateArticleByID(ctx context.Context, arg UpdateArticleByIDParams) (int64, error) {
 	result, err := q.db.ExecContext(ctx, updateArticleByID,
 		arg.Title,
+		arg.Thumbnail,
 		arg.Slug,
 		arg.Content,
 		arg.Tags,

@@ -12,6 +12,7 @@ import (
 type Article struct {
 	ID              int64
 	Title           string
+	Thumbnail       string
 	Slug            string
 	Content         string
 	Tags            []string

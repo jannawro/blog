@@ -25,6 +25,7 @@ func TestCreate(t *testing.T) {
 	testArticle := a.Article{
 		ID:              1,
 		Title:           "Article 1",
+		Thumbnail:       "Article 1 thumbnail",
 		Slug:            "article-1",
 		Tags:            []string{"tag1", "tag2"},
 		Content:         "This is the content of the test article.",
@@ -37,6 +38,7 @@ func TestCreate(t *testing.T) {
 	require.NotNil(t, response)
 	assert.NotEmpty(t, response.ID)
 	assert.Equal(t, "Article 1", response.Title)
+	assert.Equal(t, "Article 1 thumbnail", response.Thumbnail)
 	assert.Equal(t, "article-1", response.Slug)
 	assert.Equal(t, []string{"tag1", "tag2"}, response.Tags)
 	assert.Equal(t, "This is the content of the test article.", response.Content)
