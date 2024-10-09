@@ -25,7 +25,7 @@
 
    aside::before {
      content: '';
-     @apply absolute top-0 left-0 w-full h-full bg-yellow-100 -z-10;
+     @apply absolute bottom-0 left-0 w-full h-full bg-yellow-100 -z-10;
      transform: rotate(-2deg);
    }
 

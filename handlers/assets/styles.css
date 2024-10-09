@@ -488,7 +488,7 @@ aside {
 aside::before {
   content: '';
   position: absolute;
-  top: 0px;
+  bottom: 0px;
   left: 0px;
   z-index: -10;
   height: 100%;
