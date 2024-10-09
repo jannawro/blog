@@ -3,7 +3,7 @@ package components
 templ Tag(tag string) {
 <a href={ templ.SafeURL("/?tag=" + tag) }
 		class="inline-block bg-[#1a1a1a] text-[#f5f5f5] rounded-md px-2 py-1 text-sm font-bold mr-2 mb-2 uppercase relative overflow-hidden group">
-	<span class="relative z-10 pl-3">{ tag }</span>
+	<span class="relative z-10 pl-3 transition-transform duration-300 ease-in-out group-hover:translate-x-1">{ tag }</span>
 	<div class="absolute inset-y-0 left-0 w-1 bg-[#FF0000] transition-all duration-300 ease-in-out group-hover:w-2"></div>
 </a>
 }
